@@ -25,7 +25,8 @@ class Network(nn.Module):
         
         # Linear NN layers
         if actor == True:
-            self.fc1 = nn.Linear(rnn_hidden_size,hidden_in_dim)
+            self.fc1 = nn.Linear(rnn_hidden_size+int(hidden_in_dim/2),hidden_in_dim)
+            self.fc0 = nn.Linear(input_size - 2 ,int(hidden_in_dim/2))
         else:
             self.fc1 = nn.Linear(hidden_in_dim,hidden_in_dim)
         self.fc2 = nn.Linear(hidden_in_dim,hidden_out_dim)
@@ -36,6 +37,7 @@ class Network(nn.Module):
 
     def reset_parameters(self):
         self.rnn.weight.data.uniform_(*hidden_init(self.rnn))
+        self.fc0.weight.data.uniform_(*hidden_init(self.fc0))
         self.fc1.weight.data.uniform_(*hidden_init(self.fc1))
         self.fc2.weight.data.uniform_(*hidden_init(self.fc2))
         self.fc3.weight.data.uniform_(-1e-3, 1e-3)
@@ -51,8 +53,10 @@ class Network(nn.Module):
             # out: batch_size, seq_legnth, hidden_size
             out = out[:,-1,:]
             # out: batch_size, hidden_size
+            h0 = self.nonlin(self.fc0(x2))
+            x = torch.cat((out,h0), dim=1)
             # Linear
-            h1 = self.nonlin(self.fc1(out))
+            h1 = self.nonlin(self.fc1(x))
             h2 = self.nonlin(self.fc2(h1))
             h3 = (self.fc3(h2))
             norm = torch.norm(h3)

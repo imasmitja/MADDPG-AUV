@@ -35,14 +35,16 @@ class DDPGAgent():
         self.critic_optimizer = Adam(self.critic.parameters(), lr=lr_critic, weight_decay=weight_decay)
 
 
-    def act(self, obs, noise=0.0):
+    def act(self, his, obs, noise=0.0):
+        his = his.to(self.device)
         obs = obs.to(self.device)
-        action = self.actor(obs,0).cpu() + noise*self.noise.noise()
+        action = self.actor(his,obs).cpu() + noise*self.noise.noise()
         action = action.clamp(-1, 1)
         return action
 
-    def target_act(self, obs, noise=0.0):
+    def target_act(self, his, obs, noise=0.0):
+        his = his.to(self.device)
         obs = obs.to(self.device)
-        action = self.target_actor(obs,0).cpu() + noise*self.noise.noise()
+        action = self.target_actor(his,obs).cpu() + noise*self.noise.noise()
         action = action.clamp(-1, 1)
         return action

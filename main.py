@@ -36,7 +36,7 @@ RENDER = False #in BSC machines the render doesn't work
 PROGRESS_BAR = True #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
 # DEVICE = 'cpu'
-HISTORY_LENGTH = 10
+HISTORY_LENGTH = 5
 
 
 
@@ -59,9 +59,9 @@ def pre_process(entity, batchsize):
 def main():
     seeding(seed = SEED)
     # number of parallel agents
-    parallel_envs = 8
+    parallel_envs = 4
     # number of agents per environment
-    num_agents = 1
+    num_agents = 2
     # number of landmarks (or targets) per environment
     num_landmarks = 1
     # number of training episodes.
@@ -190,17 +190,19 @@ def main():
         obs_roll = np.rollaxis(all_obs,1) #[num_agents, parallel_env, observation_state_size]
         obs = transpose_list(obs_roll) #list of size parallel_env, where each list index is an array of size observation_state_size
         
-        #Initialize history buffer
+        #Initialize history buffer with 0.
         obs_size = obs[0][0].size
         history = copy.deepcopy(obs)
         for n in range(parallel_envs):
             for m in range(num_agents):
                 for i in range(HISTORY_LENGTH-1):
                     if i == 0:
-                        history[n][m] = history[n][m].reshape(1,obs_size)
-                    aux = obs[n][m].reshape(1,obs_size)
+                        history[n][m] = history[n][m].reshape(1,obs_size)*0.
+                    aux = obs[n][m].reshape(1,obs_size)*0.
                     history[n][m] = np.concatenate((history[n][m],aux),axis=0)
-               
+        #Initialize action history buffer with 0.
+        history_a = np.zeros([parallel_envs,num_agents,HISTORY_LENGTH,2]) #the last entry is the number of actions, here is 2 (x,y)
+        
         # save info or not
         save_info = ((episode) % save_interval < parallel_envs or episode==number_of_episodes-parallel_envs)
         frames = []
@@ -217,8 +219,13 @@ def main():
             # explore = only explore for a certain number of episodes
             # action input needs to be transposed
             # actions = maddpg.act(transpose_to_tensor(obs), noise=noise) 
-            actions = maddpg.act(transpose_to_tensor(history), noise=noise)           
+            his = []
+            for i in range(num_agents):
+                his.append(torch.cat((transpose_to_tensor(history)[i],transpose_to_tensor(history_a)[i]), dim=2))
             
+            
+            actions = maddpg.act(his,transpose_to_tensor(obs) , noise=noise) 
+        
             actions_array = torch.stack(actions).detach().numpy()
 
             # transpose the list of list
@@ -226,23 +233,19 @@ def main():
             # input to step requires the first index to correspond to number of parallel agents
             actions_for_env = np.rollaxis(actions_array,1)
             
+            
             # environment step
             # step forward one frame
             # next_obs, next_obs_full, rewards, dones, info = env.step(actions_for_env)
             next_obs, rewards, dones, info = env.step(actions_for_env)
             # rewards_sum += np.mean(rewards)
-            # Add next_obs to the next_history buffer
-            for n in range(parallel_envs):
-                for m in range(num_agents):
-                    aux = next_obs[n][m].reshape(1,obs_size)
-                    next_history[n][m] = np.concatenate((next_history[n][m],aux),axis=0)
-                    next_history[n][m] = np.delete(next_history[n][m],0,0)
             
             # collect experience
             # add data to buffer
             # transition = (obs, obs_full, actions_for_env, rewards, next_obs, next_obs_full, dones)
             # transition = (obs, actions_for_env, rewards, next_obs, dones)
-            transition = (history, actions_for_env, rewards, next_history, dones)
+            # transition = (history, actions_for_env, rewards, next_history, dones)
+            transition = (history, history_a, obs, actions_for_env, rewards, next_obs, dones)
             
             if EXP_REP_BUF == False:
                 buffer.push(transition)
@@ -250,9 +253,19 @@ def main():
                 buffer.push(transition,priority)                
             reward_this_episode += rewards
 
+            # Update history buffers
+            # Add obs to the history buffer
+            for n in range(parallel_envs):
+                for m in range(num_agents):
+                    aux = obs[n][m].reshape(1,obs_size)
+                    history[n][m] = np.concatenate((history[n][m],aux),axis=0)
+                    history[n][m] = np.delete(history[n][m],0,0)
+            # Add actions to the history buffer
+            history_a = np.concatenate((history_a,actions_for_env.reshape(parallel_envs,num_agents,1,2)),axis=2)
+            history_a = np.delete(history_a,0,2)
+                    
             # obs, obs_full = next_obs, next_obs_full
-            # obs = next_obs
-            history = copy.deepcopy(next_history)
+            obs = next_obs
             
             # increment global step counter
             t += parallel_envs
