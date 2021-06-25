@@ -30,7 +30,7 @@ LR_CRITIC   =   1e-3     # Learning rate of the critic
 WEIGHT_DECAY =  0 #1e-5     # L2 weight decay
 UPDATE_EVERY =  30       # How many steps to take before updating target networks
 UPDATE_TIMES =  20       # Number of times we update the networks
-SEED = 356                 # Seed for random numbers
+SEED = 3567576895                 # Seed for random numbers
 BENCHMARK   =   False
 EXP_REP_BUF =   False     # Experienced replay buffer activation
 PRE_TRAINED =   True    # Use a previouse trained network as imput weights
@@ -87,7 +87,9 @@ def main():
         # GRU
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\062221_065153\model_dir\episode-399992.pt' #First test with LS with one agent and one landmark (episode_length=35) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a GRU
         # LSTM
-        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\062221_110542\model_dir\episode-399992.pt' #First test with LS with one agent and one landmark (episode_length=35) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a LSTM
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\062221_110542\model_dir\episode-399992.pt' #First test with LS with one agent and one landmark (episode_length=35) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a LSTM
+        # new LSTM + MADDPG architecture form ""memory-based deep reinforcement learning for pomdp"
+        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\062521_081806\model_dir\episode-399992.pt' #First test with LS with one agent and one landmark (episode_length=35) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a LSTM
         
         aux = torch.load(trained_checkpoint)
         for i in range(num_agents):  
@@ -101,17 +103,18 @@ def main():
     obs_roll = np.rollaxis(all_obs,1)
     obs = transpose_list(obs_roll)
     
-    #Initialize history buffer
+    #Initialize history buffer with 0.
     obs_size = obs[0][0].size
     history = copy.deepcopy(obs)
     for n in range(parallel_envs):
         for m in range(num_agents):
             for i in range(HISTORY_LENGTH-1):
                 if i == 0:
-                    history[n][m] = history[n][m].reshape(1,obs_size)
-                aux = obs[n][m].reshape(1,obs_size)
+                    history[n][m] = history[n][m].reshape(1,obs_size)*0.
+                aux = obs[n][m].reshape(1,obs_size)*0.
                 history[n][m] = np.concatenate((history[n][m],aux),axis=0)
-    next_history = copy.deepcopy(history)
+    #Initialize action history buffer with 0.
+    history_a = np.zeros([parallel_envs,num_agents,HISTORY_LENGTH,2]) #the last entry is the number of actions, here is 2 (x,y)
     
     scores = 0                
     t = 0
@@ -119,26 +122,36 @@ def main():
         env.render('rgb_array')
         t +=1
         # select an action
+        his = []
+        for i in range(num_agents):
+            his.append(torch.cat((transpose_to_tensor(history)[i],transpose_to_tensor(history_a)[i]), dim=2))
         # actions = maddpg.act(transpose_to_tensor(obs), noise=0.)       
-        actions = maddpg.act(transpose_to_tensor(history), noise=0.) 
+        # actions = maddpg.act(transpose_to_tensor(history), noise=0.) 
+        actions = maddpg.act(his,transpose_to_tensor(obs) , noise=0.) 
          
         actions_array = torch.stack(actions).detach().numpy()
         actions_for_env = np.rollaxis(actions_array,1)
         # send all actions to the environment
         next_obs, rewards, dones, info = env.step(actions_for_env)
-        # Add next_obs to the next_history buffer
+        
+        # Update history buffers
+        # Add obs to the history buffer
         for n in range(parallel_envs):
             for m in range(num_agents):
-                aux = next_obs[n][m].reshape(1,obs_size)
-                next_history[n][m] = np.concatenate((next_history[n][m],aux),axis=0)
-                next_history[n][m] = np.delete(next_history[n][m],0,0)
+                aux = obs[n][m].reshape(1,obs_size)
+                history[n][m] = np.concatenate((history[n][m],aux),axis=0)
+                history[n][m] = np.delete(history[n][m],0,0)
+        # Add actions to the history buffer
+        history_a = np.concatenate((history_a,actions_for_env.reshape(parallel_envs,num_agents,1,2)),axis=2)
+        history_a = np.delete(history_a,0,2)
+        
                     
         # update the score (for each agent)
         scores += np.sum(rewards)            
         # print ('\r\n Rewards at step %i = %.3f'%(t,scores))
         # roll over states to next time step  
-        # obs = next_obs     
-        history = copy.deepcopy(next_history)                          
+        obs = next_obs     
+
         # print("Score: {}".format(scores))
         if np.any(dones):
             print('done')
