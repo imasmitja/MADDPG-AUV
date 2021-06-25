@@ -28,7 +28,8 @@ class Network(nn.Module):
             self.fc1 = nn.Linear(rnn_hidden_size+int(hidden_in_dim/2),hidden_in_dim)
             self.fc0 = nn.Linear(input_size - 2 ,int(hidden_in_dim/2))
         else:
-            self.fc1 = nn.Linear(hidden_in_dim,hidden_in_dim)
+            self.fc1 = nn.Linear(rnn_hidden_size+int(hidden_in_dim/2),hidden_in_dim)
+            self.fc0 = nn.Linear(input_size,int(hidden_in_dim/2))
         self.fc2 = nn.Linear(hidden_in_dim,hidden_out_dim)
         self.fc3 = nn.Linear(hidden_out_dim,output_dim)
         self.nonlin = f.relu #leaky_relu
@@ -69,7 +70,6 @@ class Network(nn.Module):
         else:
             # critic network simply outputs a number
             # RNN
-            # import pdb; pdb.set_trace()
             h0 = torch.zeros(self.rnn_num_layers, x1.size(0), self.rnn_hidden_size).to(self.device) #Initial values for RNN
             c0 = torch.zeros(self.rnn_num_layers, x1.size(0), self.rnn_hidden_size).to(self.device) #Initial values for RNN
             # out, _ = self.rnn(x1,h0)
@@ -77,7 +77,9 @@ class Network(nn.Module):
             # out: batch_size, seq_legnth, hidden_size
             out = out[:,-1,:]
             # out: batch_size, hidden_size
-            x = torch.cat((out,x2), dim=1)
+            h0 = self.nonlin(self.fc0(x2))
+            x = torch.cat((out,h0), dim=1)
+            # Linear
             h1 = self.nonlin(self.fc1(x))
             h2 = self.nonlin(self.fc2(h1))
             h3 = (self.fc3(h2))
