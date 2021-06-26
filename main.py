@@ -17,7 +17,7 @@ import copy
 import imageio
 
 BUFFER_SIZE =   int(1e6) # Replay buffer size
-BATCH_SIZE  =   512      # Mini batch size
+BATCH_SIZE  =   1024      # Mini batch size
 GAMMA       =   0.95     # Discount factor
 TAU         =   0.01     # For soft update of target parameters 
 LR_ACTOR    =   1e-3     # Learning rate of the actor
@@ -36,7 +36,7 @@ RENDER = False #in BSC machines the render doesn't work
 PROGRESS_BAR = True #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
 # DEVICE = 'cpu'
-HISTORY_LENGTH = 20
+HISTORY_LENGTH = 30
 
 
 
@@ -67,7 +67,7 @@ def main():
     # number of training episodes.
     # change this to higher number to experiment. say 30000.
     number_of_episodes = 800000
-    episode_length = 100
+    episode_length = 200
     # how many episodes to save policy and gif
     save_interval = 1000
     t = 0
