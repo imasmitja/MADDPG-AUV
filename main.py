@@ -36,7 +36,7 @@ RENDER = False #in BSC machines the render doesn't work
 PROGRESS_BAR = True #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
 # DEVICE = 'cpu'
-HISTORY_LENGTH = 5
+HISTORY_LENGTH = 20
 
 
 
@@ -66,8 +66,8 @@ def main():
     num_landmarks = 1
     # number of training episodes.
     # change this to higher number to experiment. say 30000.
-    number_of_episodes = 400000
-    episode_length = 35
+    number_of_episodes = 800000
+    episode_length = 100
     # how many episodes to save policy and gif
     save_interval = 1000
     t = 0
