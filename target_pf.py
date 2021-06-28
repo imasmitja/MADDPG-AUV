@@ -258,7 +258,7 @@ class ParticleFilter(object):
         if self._x[0] == 0 and self._x[2] == 0:
             method = 2
         else:
-            method = 2 #compound method presented in OCEANS'18 Kobe
+            method = 3 #compound method presented in OCEANS'18 Kobe
         
         if method == 1:   
             # 4- resampling with a sample probability proportional
@@ -305,7 +305,7 @@ class ParticleFilter(object):
                 ratio = 120 #15 works ok; ratio=10 is ok for statik targets
             else:
                 ratio = 50 #50 works ok; ratio=10 is ok for statik targets
-            radii = 0.01 #50 works ok
+            radii = 0.1 #50 works ok
             #From: https://classroom.udacity.com/courses/ud810/lessons/3353208568/concepts/33538586070923
             p3 = np.zeros([self.particle_number,self.dimx])
             ci = np.zeros(self.particle_number)
@@ -440,8 +440,13 @@ class Target(object):
         #the target might be. Each guess (or particle) is a vector containing [x,vx,y,vy]
         # create a set of particles
         # sense_noise is not used in area-only
-        self.pf = ParticleFilter(std_range=.01,init_velocity=.001,dimx=4,particle_number=6000,method=method,max_pf_range=max_pf_range)
-        self.pf.set_noise(forward_noise = 0.0001, turn_noise = 0.1, sense_noise=.05, velocity_noise = 0.0001)
+        # self.pf = ParticleFilter(std_range=.01,init_velocity=.001,dimx=4,particle_number=6000,method=method,max_pf_range=max_pf_range)
+        # self.pf.set_noise(forward_noise = 0.0001, turn_noise = 0.1, sense_noise=.05, velocity_noise = 0.0001)
+        
+        self.pf = ParticleFilter(std_range=.2,init_velocity=.001,dimx=4,particle_number=100,method=method,max_pf_range=max_pf_range)
+        self.pf.set_noise(forward_noise = 0.01, turn_noise = 0.1, sense_noise=.09, velocity_noise = 0.01)
+            
+            
         self.pfxs = [0.,0.,0.,0.]
         
         #############LS initialization###########################################################################

@@ -107,8 +107,8 @@ class Scenario(BaseScenario):
             world.cov[i] = np.sqrt((l.pf.covariance_vals[0])**2+(l.pf.covariance_vals[1])**2)
             rew -= world.cov[i]
             # reward as a function of the distance error between the landmark and its estimation (PF or LS)
-            # world.error[i] = np.sqrt((l.pfxs[-1][0]-world.landmarks[i].state.p_pos[0])**2+(l.pfxs[-1][2]-world.landmarks[i].state.p_pos[1])**2) #Error from PF
-            world.error[i] = np.sqrt((l.lsxs[-1][0]-world.landmarks[i].state.p_pos[0])**2+(l.lsxs[-1][2]-world.landmarks[i].state.p_pos[1])**2) #Error from LS
+            world.error[i] = np.sqrt((l.pfxs[0]-world.landmarks[i].state.p_pos[0])**2+(l.pfxs[2]-world.landmarks[i].state.p_pos[1])**2) #Error from PF
+            # world.error[i] = np.sqrt((l.lsxs[-1][0]-world.landmarks[i].state.p_pos[0])**2+(l.lsxs[-1][2]-world.landmarks[i].state.p_pos[1])**2) #Error from LS
             rew -= world.error[i]
         
         dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks[:-world.num_landmarks]]
@@ -140,9 +140,9 @@ class Scenario(BaseScenario):
                 # Add some noise in the measured range
                 slant_range += np.random.uniform(-0.001, +0.001)
                 #2:Update the PF
-                # world.landmarks_estimated[i].updatePF(dt=1., new_range=True, z=slant_range, myobserver=[agent.state.p_pos[0],0.,agent.state.p_pos[1],0.], update=True)
+                world.landmarks_estimated[i].updatePF(dt=1., new_range=True, z=slant_range, myobserver=[agent.state.p_pos[0],0.,agent.state.p_pos[1],0.], update=True)
                 #2b: Update the LS
-                world.landmarks_estimated[i].updateLS(dt=1., new_range=True, z=slant_range, myobserver=[agent.state.p_pos[0],0.,agent.state.p_pos[1],0.])
+                # world.landmarks_estimated[i].updateLS(dt=1., new_range=True, z=slant_range, myobserver=[agent.state.p_pos[0],0.,agent.state.p_pos[1],0.])
                 # Traditional plot
                 # import matplotlib.pyplot as plt
                 # plt.figure(figsize=(5,5))
@@ -154,8 +154,8 @@ class Scenario(BaseScenario):
                 # plt.ylim(-1,1)
                 # plt.show()
                 #3:Publish the new estimated position
-                # world.landmarks[i+world.num_landmarks].state.p_pos = [world.landmarks_estimated[i].pfxs[-1][0],world.landmarks_estimated[i].pfxs[-1][2]] #Using PF
-                world.landmarks[i+world.num_landmarks].state.p_pos = [world.landmarks_estimated[i].lsxs[-1][0],world.landmarks_estimated[i].lsxs[-1][2]] #Using LS
+                world.landmarks[i+world.num_landmarks].state.p_pos = [world.landmarks_estimated[i].pfxs[0],world.landmarks_estimated[i].pfxs[2]] #Using PF
+                # world.landmarks[i+world.num_landmarks].state.p_pos = [world.landmarks_estimated[i].lsxs[-1][0],world.landmarks_estimated[i].lsxs[-1][2]] #Using LS
                 
                 #Append the position of the landmark to generate the observation state
                 #Using the true landmark position
