@@ -133,8 +133,10 @@ class Scenario(BaseScenario):
                 #Update the landmarks_estiamted position using Particle Fileter
                 #1:Compute radius between the agent and each landmark
                 slant_range = np.sqrt(((entity.state.p_pos - agent.state.p_pos)[0])**2+((entity.state.p_pos - agent.state.p_pos)[1])**2)
+                target_depth = 1500./1000. #normalize the target depth
+                slant_range = np.sqrt(slant_range**2+target_depth**2) #add target depth to the range measurement
                 # Add some systematic error in the measured range
-                slant_range *= 0.99 # where 0.99 = 1% of sound speed difference = 1495 m/s
+                slant_range *= 1.01 # where 0.99 = 1% of sound speed difference = 1495 m/s
                 # Add some noise in the measured range
                 slant_range += np.random.uniform(-0.001, +0.001)
                 #2:Update the PF
