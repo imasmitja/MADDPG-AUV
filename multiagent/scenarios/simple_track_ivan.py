@@ -3,6 +3,7 @@ from multiagent.core import World, Agent, Landmark
 from multiagent.scenario import BaseScenario
 from target_pf import Target
 
+PF_METHOD = True
 
 
 class Scenario(BaseScenario):
@@ -105,10 +106,12 @@ class Scenario(BaseScenario):
         for i,l in enumerate(world.landmarks_estimated):
             # reward as a function of covariance matrix (PF)
             world.cov[i] = np.sqrt((l.pf.covariance_vals[0])**2+(l.pf.covariance_vals[1])**2)
-            rew -= world.cov[i]
+            rew -= world.cov[i]/100
             # reward as a function of the distance error between the landmark and its estimation (PF or LS)
-            world.error[i] = np.sqrt((l.pfxs[0]-world.landmarks[i].state.p_pos[0])**2+(l.pfxs[2]-world.landmarks[i].state.p_pos[1])**2) #Error from PF
-            # world.error[i] = np.sqrt((l.lsxs[-1][0]-world.landmarks[i].state.p_pos[0])**2+(l.lsxs[-1][2]-world.landmarks[i].state.p_pos[1])**2) #Error from LS
+            if PF_METHOD == True:
+                world.error[i] = np.sqrt((l.pfxs[0]-world.landmarks[i].state.p_pos[0])**2+(l.pfxs[2]-world.landmarks[i].state.p_pos[1])**2) #Error from PF
+            else:
+                world.error[i] = np.sqrt((l.lsxs[-1][0]-world.landmarks[i].state.p_pos[0])**2+(l.lsxs[-1][2]-world.landmarks[i].state.p_pos[1])**2) #Error from LS
             rew -= world.error[i]
         
         dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks[:-world.num_landmarks]]
@@ -133,29 +136,33 @@ class Scenario(BaseScenario):
                 #Update the landmarks_estiamted position using Particle Fileter
                 #1:Compute radius between the agent and each landmark
                 slant_range = np.sqrt(((entity.state.p_pos - agent.state.p_pos)[0])**2+((entity.state.p_pos - agent.state.p_pos)[1])**2)
-                target_depth = 1500./1000. #normalize the target depth
+                target_depth = 15./1000. #normalize the target depth
                 slant_range = np.sqrt(slant_range**2+target_depth**2) #add target depth to the range measurement
                 # Add some systematic error in the measured range
                 slant_range *= 1.01 # where 0.99 = 1% of sound speed difference = 1495 m/s
                 # Add some noise in the measured range
                 slant_range += np.random.uniform(-0.001, +0.001)
                 #2:Update the PF
-                world.landmarks_estimated[i].updatePF(dt=1., new_range=True, z=slant_range, myobserver=[agent.state.p_pos[0],0.,agent.state.p_pos[1],0.], update=True)
-                #2b: Update the LS
-                # world.landmarks_estimated[i].updateLS(dt=1., new_range=True, z=slant_range, myobserver=[agent.state.p_pos[0],0.,agent.state.p_pos[1],0.])
+                if PF_METHOD == True:
+                    world.landmarks_estimated[i].updatePF(dt=1., new_range=True, z=slant_range, myobserver=[agent.state.p_pos[0],0.,agent.state.p_pos[1],0.], update=True)
+                else:
+                    #2b: Update the LS
+                    world.landmarks_estimated[i].updateLS(dt=1., new_range=True, z=slant_range, myobserver=[agent.state.p_pos[0],0.,agent.state.p_pos[1],0.])
                 # Traditional plot
                 # import matplotlib.pyplot as plt
                 # plt.figure(figsize=(5,5))
                 # plt.plot(world.landmarks_estimated[i].pf._x[0],world.landmarks_estimated[i].pf._x[2], 'r^', ms=20)
                 # plt.plot(world.landmarks_estimated[i].pf.x.T[0],world.landmarks_estimated[i].pf.x.T[2], 'ro', ms=5, alpha=0.3)
                 # plt.plot(world.landmarks[0].state.p_pos[0],world.landmarks[0].state.p_pos[1], 'ko', ms=6, alpha = 0.5)
-                # plt.plot(world.agents[0].state.p_pos[0],world.agents[0].state.p_pos[1], 'ko', ms=6, alpha = 0.5)
+                # plt.plot(world.agents[0].state.p_pos[0],world.agents[0].state.p_pos[1], 'bo', ms=6, alpha = 0.5)
                 # plt.xlim(-1,1)
                 # plt.ylim(-1,1)
                 # plt.show()
                 #3:Publish the new estimated position
-                world.landmarks[i+world.num_landmarks].state.p_pos = [world.landmarks_estimated[i].pfxs[0],world.landmarks_estimated[i].pfxs[2]] #Using PF
-                # world.landmarks[i+world.num_landmarks].state.p_pos = [world.landmarks_estimated[i].lsxs[-1][0],world.landmarks_estimated[i].lsxs[-1][2]] #Using LS
+                if PF_METHOD == True:
+                    world.landmarks[i+world.num_landmarks].state.p_pos = [world.landmarks_estimated[i].pfxs[0],world.landmarks_estimated[i].pfxs[2]] #Using PF
+                else:
+                    world.landmarks[i+world.num_landmarks].state.p_pos = [world.landmarks_estimated[i].lsxs[-1][0],world.landmarks_estimated[i].lsxs[-1][2]] #Using LS
                 
                 #Append the position of the landmark to generate the observation state
                 #Using the true landmark position
