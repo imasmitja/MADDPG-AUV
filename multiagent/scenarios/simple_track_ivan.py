@@ -3,7 +3,7 @@ from multiagent.core import World, Agent, Landmark
 from multiagent.scenario import BaseScenario
 from target_pf import Target
 
-PF_METHOD = True
+PF_METHOD = False
 
 
 class Scenario(BaseScenario):
