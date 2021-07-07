@@ -30,7 +30,7 @@ LR_CRITIC   =   1e-3     # Learning rate of the critic
 WEIGHT_DECAY =  0 #1e-5     # L2 weight decay
 UPDATE_EVERY =  30       # How many steps to take before updating target networks
 UPDATE_TIMES =  20       # Number of times we update the networks
-SEED = 9033                 # Seed for random numbers
+SEED = 9808944                 # Seed for random numbers
 BENCHMARK   =   False
 EXP_REP_BUF =   False     # Experienced replay buffer activation
 PRE_TRAINED =   True    # Use a previouse trained network as imput weights
@@ -39,7 +39,7 @@ SCENARIO    =   "simple_track_ivan"
 RENDER = True #in BSC machines the render doesn't work
 PROGRESS_BAR = True #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
-HISTORY_LENGTH = 5
+HISTORY_LENGTH = 200
 
 def seeding(seed=1):
     np.random.seed(seed)
@@ -94,7 +94,11 @@ def main():
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\062621_120243\model_dir\episode-799992.pt' #First test with LS with one agent and one landmark (episode_length=35) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a LSTM. Same as before but with -10 reward if landmark colision, but with extra tweeks
         #Systematic error with target depth equal to 1500 m.
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\062821_075229\model_dir\episode-799992.pt' #(LS) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a LSTM. Same as before but with -10 reward if landmark colision, but with extra tweeks. I took into acount the target depth to compute systematic error
-        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\062821_092548\model_dir\episode-799992.pt' #(PF) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a LSTM. Same as before but with -10 reward if landmark colision, but with extra tweeks. I took into acount the target depth to compute systematic error
+        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\070121_091727\model_dir\episode-633000.pt' #(LS) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a LSTM. Same as before but with -10 reward if landmark colision, but with extra tweeks. I took into acount the target depth to compute systematic error, as the previous but with history length = 50
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\062821_092548\model_dir\episode-799992.pt' #(PF) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a LSTM. Same as before but with -10 reward if landmark colision, but with extra tweeks. I took into acount the target depth to compute systematic error
+        #Systematic error with target depth equal to 15m.
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\070121_074006\model_dir\episode-576000.pt' #(PF) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a LSTM. Same as before but with -10 reward if landmark colision, but with extra tweeks. I took into acount the target depth to compute systematic error
+        
         
         aux = torch.load(trained_checkpoint)
         for i in range(num_agents):  
@@ -123,8 +127,16 @@ def main():
     
     scores = 0                
     t = 0
-    while True:
-        env.render('rgb_array')
+    #save gif
+    frames = []
+    gif_folder = ''
+    main_folder = trained_checkpoint.split('\\')
+    for i in range(len(main_folder)-2):
+        gif_folder += main_folder[i]
+        gif_folder += '\\'
+        
+    while t<1000:
+        frames.append(env.render('rgb_array'))
         t +=1
         # select an action
         his = []
@@ -161,6 +173,8 @@ def main():
         if np.any(dones):
             print('done')
             print('Next:')
+    imageio.mimsave(os.path.join(gif_folder, 'seed-{}.gif'.format(SEED)), 
+                                frames, duration=.04)
     env.close()
     
 if __name__=='__main__':
