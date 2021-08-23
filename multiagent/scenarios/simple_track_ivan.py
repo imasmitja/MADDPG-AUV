@@ -168,7 +168,9 @@ class Scenario(BaseScenario):
                 #Using the true landmark position
                 # entity_pos.append(entity.state.p_pos - agent.state.p_pos)
                 #Using the estimated landmark position
-                entity_pos.append(world.landmarks[i+world.num_landmarks].state.p_pos - agent.state.p_pos)
+                # entity_pos.append(world.landmarks[i+world.num_landmarks].state.p_pos - agent.state.p_pos)
+                #Using the estimated landmark position but without delating the agent position. so it has a global position.
+                entity_pos.append(world.landmarks[i+world.num_landmarks].state.p_pos)
                 entity_range.append(slant_range)
                 
         # entity colors

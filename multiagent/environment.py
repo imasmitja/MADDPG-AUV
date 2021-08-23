@@ -4,6 +4,9 @@ from gym.envs.registration import EnvSpec
 import numpy as np
 from multiagent.multi_discrete import MultiDiscrete
 
+#global
+old_entity = 0
+
 # environment for all agents in the multiagent world
 # currently code assumes that no agents will be created/destroyed at runtime!
 class MultiAgentEnv(gym.Env):
@@ -213,6 +216,7 @@ class MultiAgentEnv(gym.Env):
 
     # render environment
     def render(self, mode='human'):
+        global old_entity
         if mode == 'human':
             alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
             message = ''
@@ -254,6 +258,17 @@ class MultiAgentEnv(gym.Env):
                 geom.add_attr(xform)
                 self.render_geoms.append(geom)
                 self.render_geoms_xform.append(xform)
+                
+                #TODO I'm trying to plot a line using render
+                # if 'agent' in entity.name:
+                #     print('old_entity =',old_entity)
+                #     if old_entity == 0:
+                #         line = rendering.Line(start=entity.state.p_pos,end=entity.state.p_pos)
+                #     else:
+                #         line = rendering.Line(start=old_entity.state.p_pos,end=entity.state.p_pos)
+                #     self.render_geoms.append(line)
+                #     old_entity = entity
+                
 
             # add geoms to viewer
             for viewer in self.viewers:

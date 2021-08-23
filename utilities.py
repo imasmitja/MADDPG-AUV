@@ -99,6 +99,33 @@ def gumbel_softmax(logits, temperature=0.5, hard=False):
         y = (y_hard - y).detach() + y
     return y
 
+# modified by Ivan, to see an agent doing circles around the predicted landmark position. To compere with a MADDPG trained agent.
+def circle_path(obs_all):
+    # Set the movement of the mywg
+    # Get parameters
+    actions = np.array([[[]]])
+    for obs_env in obs_all:
+        for obs in obs_env:
+            agent_pos = np.matrix([obs[2],obs[3]]).T #Agent position [x,y]
+            landmark_pos = np.matrix([obs[4],obs[5]]).T #Predicted landmark position [x,y]
+            
+            angle_agent_landmark = np.arctan2((landmark_pos).item(1),(landmark_pos).item(0)) #Angle between WG and Target
+        
+            #Agent goes with a parabolic trajectory and does circumferences around the landmark with a radius each step shorter
+            # radiu=0.005
+            # maxangle = 1.
+            radius_size = 55. #if this value is bigger, the circle radius is smaller 60 => radi = 200m
+            angle = angle_agent_landmark + np.pi/2.-radius_size*np.pi/180.
+            
+            #Code to standerize the angle
+            aux2=np.arctan2(np.sin(angle),np.cos(angle))
+            angle=aux2
+            try:
+                actions = np.concatenate((actions,np.array([[[np.cos(angle),np.sin(angle)]]])),axis=1)
+            except:
+                actions = np.array([[[np.cos(angle),np.sin(angle)]]])
+    return actions
+
 """def main():
     torch.Tensor()
     print(onehot_from_logits())

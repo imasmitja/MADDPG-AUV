@@ -14,9 +14,10 @@ import torch
 import numpy as np
 from tensorboardX import SummaryWriter
 import os
-from utilities import transpose_list, transpose_to_tensor
+from utilities import transpose_list, transpose_to_tensor, circle_path
 import time
 import copy
+import matplotlib.pyplot as plt
 
 # for saving gif
 import imageio
@@ -30,7 +31,7 @@ LR_CRITIC   =   1e-3     # Learning rate of the critic
 WEIGHT_DECAY =  0 #1e-5     # L2 weight decay
 UPDATE_EVERY =  30       # How many steps to take before updating target networks
 UPDATE_TIMES =  20       # Number of times we update the networks
-SEED = 9808944                 # Seed for random numbers
+SEED = 999                 # Seed for random numbers
 BENCHMARK   =   False
 EXP_REP_BUF =   False     # Experienced replay buffer activation
 PRE_TRAINED =   True    # Use a previouse trained network as imput weights
@@ -134,8 +135,16 @@ def main():
     for i in range(len(main_folder)-2):
         gif_folder += main_folder[i]
         gif_folder += '\\'
-        
-    while t<1000:
+    total_rewards = []
+    steps = []
+    agent_x = []
+    agent_y = []
+    landmark_x = []
+    landmark_y = []
+    landmark_p_x = []
+    landmark_p_y = []
+    range_total = []
+    while t<100:
         frames.append(env.render('rgb_array'))
         t +=1
         # select an action
@@ -148,6 +157,10 @@ def main():
          
         actions_array = torch.stack(actions).detach().numpy()
         actions_for_env = np.rollaxis(actions_array,1)
+        
+        #TODO: I'm traying to do a cirlce path using my previous functions
+        # actions_for_env = circle_path(obs)
+        
         # send all actions to the environment
         next_obs, rewards, dones, info = env.step(actions_for_env)
         
@@ -161,10 +174,21 @@ def main():
         # Add actions to the history buffer
         history_a = np.concatenate((history_a,actions_for_env.reshape(parallel_envs,num_agents,1,2)),axis=2)
         history_a = np.delete(history_a,0,2)
-        
                     
         # update the score (for each agent)
-        scores += np.sum(rewards)            
+        scores += np.sum(rewards)  
+        # Save values to plot later on
+        total_rewards.append(np.sum(rewards))
+        steps.append(t)          
+        for n in range(parallel_envs):
+            for m in range(num_agents):
+                agent_x.append(obs[n][m][2])
+                agent_y.append(obs[n][m][3])
+                landmark_x.append(obs[n][m][4])
+                landmark_y.append(obs[n][m][5])
+                landmark_p_x.append(obs[n][m][4]+obs[n][m][2])
+                landmark_p_y.append(obs[n][m][5]+obs[n][m][3])
+                range_total.append(obs[n][m][6])
         # print ('\r\n Rewards at step %i = %.3f'%(t,scores))
         # roll over states to next time step  
         obs = next_obs     
@@ -173,6 +197,37 @@ def main():
         if np.any(dones):
             print('done')
             print('Next:')
+            
+    plt.figure(figsize=(5,5))
+    plt.plot(steps,total_rewards,'bo-')
+    plt.xlabel('Rewards')
+    plt.ylabel('Steps')
+    plt.title('Trained agent (RL)')
+    # plt.title('Predefined cricumference')
+    plt.show()
+    
+    plt.figure(figsize=(5,5))
+    plt.plot(agent_x,agent_y,'bo--',alpha=0.5,label='Agent')
+    plt.plot(landmark_p_x,landmark_p_y,'ro--',alpha=0.5,label='Landmark')
+    plt.xlabel('X position')
+    plt.ylabel('Y position')
+    plt.title('Trained agent (RL)')
+    # plt.title('Predefined cricumference')
+    plt.legend()
+    plt.show()
+    
+    plt.figure(figsize=(5,5))
+    plt.plot(steps,range_total,'bo-')
+    plt.xlabel('Range')
+    plt.ylabel('Steps')
+    plt.title('Trained agent (RL)')
+    # plt.title('Predefined cricumference')
+    plt.show()
+    print('MEAN SCORE = ',scores)
+    print('TOTAL LAST SCORE = ',np.mean(total_rewards[::-1][:10]))
+    
+    while True:
+        a = 0
     imageio.mimsave(os.path.join(gif_folder, 'seed-{}.gif'.format(SEED)), 
                                 frames, duration=.04)
     env.close()
