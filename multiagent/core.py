@@ -54,6 +54,10 @@ class Entity(object):
 class Landmark(Entity):
      def __init__(self):
         super(Landmark, self).__init__()
+        # action
+        self.action = Action()
+        # physical motor noise amount
+        self.u_noise = 0
 
 # properties of agent entities
 class Agent(Entity):
@@ -138,10 +142,15 @@ class World(object):
     # gather agent action forces
     def apply_action_force(self, p_force):
         # set applied forces
-        for i,agent in enumerate(self.agents):
-            if agent.movable:
-                noise = np.random.randn(*agent.action.u.shape) * agent.u_noise if agent.u_noise else 0.0
-                p_force[i] = agent.action.u + noise 
+        for i,entity in enumerate(self.entities):
+            if 'agent' in entity.name:
+                if entity.movable:
+                    noise = np.random.randn(*entity.action.u.shape) * entity.u_noise if entity.u_noise else 0.0
+                    p_force[i] = entity.action.u + noise 
+            if 'landmark' in entity.name:
+                if entity.movable:
+                    noise = np.random.randn(2)*0.001
+                    p_force[i] = entity.action.u + noise 
         return p_force
 
     # gather physical forces acting on entities

@@ -106,7 +106,10 @@ class MultiAgentEnv(gym.Env):
             self.world.entities[self.world.num_agents + self.world.num_landmarks + i].size = self.world.cov[i] 
         self._reset_render() # we need to reset the render, ifnot the changes made in landmark.size doesn't appears
             
-            
+        # # update landmark position
+        # for i in range(int(len(self.world.landmarks)/2)):
+        #     self._set_action((0.1,0),self.world.entities[self.world.num_agents + i],self.action_space[i])
+        
         # all agents get total reward in cooperative case
         reward = np.sum(reward_n)
         if self.shared_reward:

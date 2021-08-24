@@ -28,7 +28,8 @@ class Scenario(BaseScenario):
             if i < num_landmarks:
                 landmark.name = 'landmark %d' % i
                 landmark.collide = False
-                landmark.movable = False
+                landmark.movable = True
+                
             else:
                 landmark.name = 'landmark_estimation %d' % (i-num_landmarks)
                 landmark.collide = False
@@ -60,6 +61,10 @@ class Scenario(BaseScenario):
             if i < world.num_landmarks:
                 landmark.state.p_pos = np.random.uniform(-0.5, +0.5, world.dim_p)
                 landmark.state.p_vel = np.zeros(world.dim_p)
+                # landmark.state.p_vel = np.array([0.1,0])
+                landmark.damping = 0.0
+                landmark.action.u = np.array([0.0,0.0])
+                landmark.u_noise = 0.001
             else:
                 landmark.state.p_pos = world.agents[0].state.p_pos
                 landmark.state.p_vel = np.zeros(world.dim_p)
@@ -84,13 +89,15 @@ class Scenario(BaseScenario):
                 if self.is_collision(a, agent):
                     rew -= 1
                     collisions += 1
-        if world.landmark.collide:
-            for l in world.landmarks:
+        
+            if l.collide:
                 if self.is_collision(l, agent):
                     rew -= 1
                     collisions +=1
-            
-        return (rew, collisions, min_dists, occupied_landmarks)
+        landmarks_real_p = []
+        for i in range(world.num_landmarks):
+            landmarks_real_p.append(world.landmarks[i].state.p_pos)
+        return (rew, collisions, min_dists, occupied_landmarks,landmarks_real_p)
 
 
     def is_collision(self, agent1, agent2):
@@ -172,6 +179,10 @@ class Scenario(BaseScenario):
                 #Using the estimated landmark position but without delating the agent position. so it has a global position.
                 # entity_pos.append(world.landmarks[i+world.num_landmarks].state.p_pos)
                 entity_range.append(slant_range)
+                
+                # Move the landmark if movable
+                if entity.movable:
+                    entity.action.u = np.array([0.05,0.0])
                 
         # entity colors
         entity_color = []

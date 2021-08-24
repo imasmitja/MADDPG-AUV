@@ -31,12 +31,13 @@ LR_CRITIC   =   1e-3     # Learning rate of the critic
 WEIGHT_DECAY =  0 #1e-5     # L2 weight decay
 UPDATE_EVERY =  30       # How many steps to take before updating target networks
 UPDATE_TIMES =  20       # Number of times we update the networks
-SEED = 999                 # Seed for random numbers
-BENCHMARK   =   False
+SEED = 9998                 # Seed for random numbers
+BENCHMARK   =   True
 EXP_REP_BUF =   False     # Experienced replay buffer activation
 PRE_TRAINED =   True    # Use a previouse trained network as imput weights
 #Scenario used to train the networks
-SCENARIO    =   "simple_track_ivan" 
+# SCENARIO    =   "simple_track_ivan" 
+SCENARIO    =   "dynamic_track_ivan" 
 RENDER = True #in BSC machines the render doesn't work
 PROGRESS_BAR = True #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
@@ -159,7 +160,7 @@ def main():
         actions_for_env = np.rollaxis(actions_array,1)
         
         #TODO: I'm traying to do a cirlce path using my previous functions
-        # actions_for_env = circle_path(obs)
+        actions_for_env = circle_path(obs)
         
         # send all actions to the environment
         next_obs, rewards, dones, info = env.step(actions_for_env)
@@ -184,11 +185,13 @@ def main():
             for m in range(num_agents):
                 agent_x.append(obs[n][m][2])
                 agent_y.append(obs[n][m][3])
-                landmark_x.append(obs[n][m][4])
-                landmark_y.append(obs[n][m][5])
+                range_total.append(obs[n][m][6])
+            for mm in range(num_landmarks):
+                landmark_x.append(info[0]['n'][0][4][0][0])
+                landmark_y.append(info[0]['n'][0][4][0][1])
                 landmark_p_x.append(obs[n][m][4]+obs[n][m][2])
                 landmark_p_y.append(obs[n][m][5]+obs[n][m][3])
-                range_total.append(obs[n][m][6])
+                
         # print ('\r\n Rewards at step %i = %.3f'%(t,scores))
         # roll over states to next time step  
         obs = next_obs     
@@ -208,7 +211,9 @@ def main():
     
     plt.figure(figsize=(5,5))
     plt.plot(agent_x,agent_y,'bo--',alpha=0.5,label='Agent')
-    plt.plot(landmark_p_x,landmark_p_y,'ro--',alpha=0.5,label='Landmark')
+    plt.plot(landmark_x,landmark_y,'k^--',alpha=0.5,label='Landmark Real')
+    plt.plot(landmark_p_x,landmark_p_y,'rs--',alpha=0.5,label='Landmark Predicted')
+    
     plt.xlabel('X position')
     plt.ylabel('Y position')
     plt.title('Trained agent (RL)')
