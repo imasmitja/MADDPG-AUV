@@ -31,7 +31,7 @@ LR_CRITIC   =   1e-3     # Learning rate of the critic
 WEIGHT_DECAY =  0 #1e-5     # L2 weight decay
 UPDATE_EVERY =  30       # How many steps to take before updating target networks
 UPDATE_TIMES =  20       # Number of times we update the networks
-SEED = 9998                 # Seed for random numbers
+SEED = 945                # Seed for random numbers
 BENCHMARK   =   True
 EXP_REP_BUF =   False     # Experienced replay buffer activation
 PRE_TRAINED =   True    # Use a previouse trained network as imput weights
@@ -145,7 +145,7 @@ def main():
     landmark_p_x = []
     landmark_p_y = []
     range_total = []
-    while t<100:
+    while t<400:
         frames.append(env.render('rgb_array'))
         t +=1
         # select an action
@@ -160,7 +160,7 @@ def main():
         actions_for_env = np.rollaxis(actions_array,1)
         
         #TODO: I'm traying to do a cirlce path using my previous functions
-        actions_for_env = circle_path(obs)
+        # actions_for_env = circle_path(obs)
         
         # send all actions to the environment
         next_obs, rewards, dones, info = env.step(actions_for_env)

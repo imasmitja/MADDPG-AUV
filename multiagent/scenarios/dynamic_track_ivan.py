@@ -182,7 +182,18 @@ class Scenario(BaseScenario):
                 
                 # Move the landmark if movable
                 if entity.movable:
-                    entity.action.u = np.array([0.05,0.0])
+                    #linear movement
+                    # entity.action.u = np.array([0.05,0.0])
+                    #random movement
+                    entity.action.u = np.random.randn(2)/2.
+                    if entity.state.p_pos[0] > 0.9:
+                        entity.action.u[0] = -abs(entity.action.u[0])
+                    if entity.state.p_pos[0] < -0.9:
+                        entity.action.u[0] = abs(entity.action.u[0])
+                    if entity.state.p_pos[1] > 0.9:
+                        entity.action.u[1] = -abs(entity.action.u[1])
+                    if entity.state.p_pos[1] < -0.9:
+                        entity.action.u[1] = abs(entity.action.u[1])
                 
         # entity colors
         entity_color = []
