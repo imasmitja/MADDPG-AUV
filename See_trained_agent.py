@@ -31,7 +31,7 @@ LR_CRITIC   =   1e-3     # Learning rate of the critic
 WEIGHT_DECAY =  0 #1e-5     # L2 weight decay
 UPDATE_EVERY =  30       # How many steps to take before updating target networks
 UPDATE_TIMES =  20       # Number of times we update the networks
-SEED = 945                # Seed for random numbers
+SEED = 378                # Seed for random numbers
 BENCHMARK   =   True
 EXP_REP_BUF =   False     # Experienced replay buffer activation
 PRE_TRAINED =   True    # Use a previouse trained network as imput weights
@@ -96,10 +96,15 @@ def main():
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\062621_120243\model_dir\episode-799992.pt' #First test with LS with one agent and one landmark (episode_length=35) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a LSTM. Same as before but with -10 reward if landmark colision, but with extra tweeks
         #Systematic error with target depth equal to 1500 m.
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\062821_075229\model_dir\episode-799992.pt' #(LS) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a LSTM. Same as before but with -10 reward if landmark colision, but with extra tweeks. I took into acount the target depth to compute systematic error
-        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\070121_091727\model_dir\episode-633000.pt' #(LS) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a LSTM. Same as before but with -10 reward if landmark colision, but with extra tweeks. I took into acount the target depth to compute systematic error, as the previous but with history length = 50
+        # [WORKS QUITE WELL]trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\070121_091727\model_dir\episode-633000.pt' #(LS) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a LSTM. Same as before but with -10 reward if landmark colision, but with extra tweeks. I took into acount the target depth to compute systematic error, as the previous but with history length = 50
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\062821_092548\model_dir\episode-799992.pt' #(PF) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a LSTM. Same as before but with -10 reward if landmark colision, but with extra tweeks. I took into acount the target depth to compute systematic error
         #Systematic error with target depth equal to 15m.
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\070121_074006\model_dir\episode-576000.pt' #(PF) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a LSTM. Same as before but with -10 reward if landmark colision, but with extra tweeks. I took into acount the target depth to compute systematic error
+        # [WORKS QUITE WELL] New test using a global reference instead of reference the landmark to the agent (aka substracting the position of the landmark - the position of the agent)
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\082421_053336\model_dir\episode-649000.pt' #(LS) has the previous tests, but with global reference. Change the line 171 by 173 in simple_track_ivan.py environment
+        # Tests using the new dynamic_tracking_ivan.py environment
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\082521_014212\model_dir\episode-624000.pt' #(LS) has the previous tests, but without global reference. The target moves linear at (0.05, 0.0) Line 186
+        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\082521_230203\model_dir\episode-799992.pt' #(LS) has the previous tests, but without global reference. The target moves randomly Line 188
         
         
         aux = torch.load(trained_checkpoint)
@@ -211,8 +216,8 @@ def main():
     
     plt.figure(figsize=(5,5))
     plt.plot(agent_x,agent_y,'bo--',alpha=0.5,label='Agent')
-    plt.plot(landmark_x,landmark_y,'k^--',alpha=0.5,label='Landmark Real')
     plt.plot(landmark_p_x,landmark_p_y,'rs--',alpha=0.5,label='Landmark Predicted')
+    plt.plot(landmark_x,landmark_y,'k^--',alpha=0.5,label='Landmark Real')
     
     plt.xlabel('X position')
     plt.ylabel('Y position')

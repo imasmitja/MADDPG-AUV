@@ -84,13 +84,15 @@ class Scenario(BaseScenario):
                 if self.is_collision(a, agent):
                     rew -= 1
                     collisions += 1
-        if world.landmark.collide:
-            for l in world.landmarks:
+        
+            if l.collide:
                 if self.is_collision(l, agent):
                     rew -= 1
                     collisions +=1
-            
-        return (rew, collisions, min_dists, occupied_landmarks)
+        landmarks_real_p = []
+        for i in range(world.num_landmarks):
+            landmarks_real_p.append(world.landmarks[i].state.p_pos)
+        return (rew, collisions, min_dists, occupied_landmarks,landmarks_real_p)
 
 
     def is_collision(self, agent1, agent2):

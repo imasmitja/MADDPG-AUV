@@ -24,7 +24,7 @@ LR_ACTOR    =   1e-3     # Learning rate of the actor
 LR_CRITIC   =   1e-4     # Learning rate of the critic
 WEIGHT_DECAY =  0#1e-5     # L2 weight decay
 UPDATE_EVERY =  30        # How many steps to take before updating target networks
-UPDATE_TIMES =  10       # Number of times we update the networks
+UPDATE_TIMES =  20       # Number of times we update the networks
 SEED = 3                 # Seed for random numbers
 BENCHMARK   =   False
 EXP_REP_BUF =   False     # Experienced replay buffer activation
@@ -37,7 +37,7 @@ RENDER = False #in BSC machines the render doesn't work
 PROGRESS_BAR = True #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
 # DEVICE = 'cpu'
-HISTORY_LENGTH = 50
+HISTORY_LENGTH = 15
 
 
 
@@ -68,9 +68,9 @@ def main():
     # number of training episodes.
     # change this to higher number to experiment. say 30000.
     number_of_episodes = 800000
-    episode_length = 100
+    episode_length = 300
     # how many episodes to save policy and gif
-    save_interval = 1000
+    save_interval = 50000
     t = 0
     
     # amplitude of OU noise

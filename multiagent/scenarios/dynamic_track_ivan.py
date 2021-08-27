@@ -113,19 +113,21 @@ class Scenario(BaseScenario):
         for i,l in enumerate(world.landmarks_estimated):
             # reward as a function of covariance matrix (PF)
             world.cov[i] = np.sqrt((l.pf.covariance_vals[0])**2+(l.pf.covariance_vals[1])**2)
-            rew -= world.cov[i]/100
+            # rew -= world.cov[i]/100
             # reward as a function of the distance error between the landmark and its estimation (PF or LS)
             if PF_METHOD == True:
                 world.error[i] = np.sqrt((l.pfxs[0]-world.landmarks[i].state.p_pos[0])**2+(l.pfxs[2]-world.landmarks[i].state.p_pos[1])**2) #Error from PF
             else:
                 world.error[i] = np.sqrt((l.lsxs[-1][0]-world.landmarks[i].state.p_pos[0])**2+(l.lsxs[-1][2]-world.landmarks[i].state.p_pos[1])**2) #Error from LS
-            rew -= world.error[i]
+            rew -= world.error[i]*10
         
         dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks[:-world.num_landmarks]]
         if min(dists) > 1.5: #agent outside the world
             rew -= 10
-        if min(dists) < 0.16: #is collision
-            rew -= 10
+        if min(dists) < 0.05: #is collision
+            rew -= 1
+        if min(dists) > 0.05 and min(dists) < 0.06: #is no collision but closer to target
+            rew += 2
             
         if agent.collide:
             for a in world.agents:
