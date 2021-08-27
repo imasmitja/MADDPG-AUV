@@ -25,8 +25,12 @@ class DDPGAgent():
 
         self.noise = OUNoise(out_actor, scale=1.0 )
         self.device = device
-
         
+        # from torchsummary import summary
+        
+        # import pdb; pdb.set_trace()
+        # summary(self.actor, (3, 224, 224))
+
         # initialize targets same as original networks
         hard_update(self.target_actor, self.actor)
         hard_update(self.target_critic, self.critic)

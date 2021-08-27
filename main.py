@@ -324,6 +324,7 @@ def main():
             # agent2_reward = []
             for a_i, avg_rew in enumerate(avg_rewards):
                 logger.add_scalar('agent%i/mean_episode_rewards' % a_i, avg_rew, episode)
+                
 
         #saving model
         save_dict_list =[]

@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as f
 import numpy as np
+from torchsummary import summary
 
 def hidden_init(layer):
     fan_in = layer.weight.data.size()[0]
@@ -54,8 +55,8 @@ class Network(nn.Module):
             # out: batch_size, seq_legnth, hidden_size
             out = out[:,-1,:]
             # out: batch_size, hidden_size
-            h0 = self.nonlin(self.fc0(x2))
-            x = torch.cat((out,h0), dim=1)
+            h00 = self.nonlin(self.fc0(x2))
+            x = torch.cat((out,h00), dim=1)
             # Linear
             h1 = self.nonlin(self.fc1(x))
             h2 = self.nonlin(self.fc2(h1))
@@ -77,10 +78,39 @@ class Network(nn.Module):
             # out: batch_size, seq_legnth, hidden_size
             out = out[:,-1,:]
             # out: batch_size, hidden_size
-            h0 = self.nonlin(self.fc0(x2))
-            x = torch.cat((out,h0), dim=1)
+            h00 = self.nonlin(self.fc0(x2))
+            x = torch.cat((out,h00), dim=1)
             # Linear
             h1 = self.nonlin(self.fc1(x))
             h2 = self.nonlin(self.fc2(h1))
             h3 = (self.fc3(h2))
             return h3
+
+
+# from tensorboardX import SummaryWriter
+# logger = SummaryWriter(log_dir='test')
+# logger.add_graph(Network)
+
+num_landmarks = 1
+num_agents = 1
+in_actor = num_landmarks*2 + (num_agents-1)*2 + 2+2 + num_landmarks + 2 #x-y of landmarks + x-y of others + x-y and x-y velocity of current agent + range to landmarks + 2 actions
+hidden_in_actor = in_actor*15
+hidden_out_actor = int(hidden_in_actor/2)
+out_actor = 2 #each agent have 2 continuous actions on x-y plane
+in_critic = in_actor * num_agents # the critic input is all agents concatenated
+hidden_in_critic = in_critic * 15 + out_actor * num_agents
+hidden_out_critic = int(hidden_in_critic/2)
+#RNN
+rnn_num_layers = 2 #two stacked RNN to improve the performance (default = 1)
+rnn_hidden_size_actor = hidden_in_actor
+rnn_hidden_size_critic = hidden_in_critic - out_actor * num_agents
+        
+import hiddenlayer as hl
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # PyTorch v0.4.0
+model = Network(in_actor, hidden_in_actor, hidden_out_actor, out_actor, rnn_num_layers, rnn_hidden_size_actor, device,actor=True)
+hl.build_graph(model,torch.zeros([1,2,3,4]))
+
+
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # PyTorch v0.4.0
+# model = Network(in_actor, hidden_in_actor, hidden_out_actor, out_actor, rnn_num_layers, rnn_hidden_size_actor, device,actor=True).to(device)
+# summary(model, (1, 28, 28))
