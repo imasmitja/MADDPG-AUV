@@ -31,17 +31,17 @@ LR_CRITIC   =   1e-3     # Learning rate of the critic
 WEIGHT_DECAY =  0 #1e-5     # L2 weight decay
 UPDATE_EVERY =  30       # How many steps to take before updating target networks
 UPDATE_TIMES =  20       # Number of times we update the networks
-SEED = 378                # Seed for random numbers
+SEED = 8                # Seed for random numbers
 BENCHMARK   =   True
 EXP_REP_BUF =   False     # Experienced replay buffer activation
 PRE_TRAINED =   True    # Use a previouse trained network as imput weights
 #Scenario used to train the networks
-SCENARIO    =   "simple_track_ivan" 
-# SCENARIO    =   "dynamic_track_ivan" 
+# SCENARIO    =   "simple_track_ivan" 
+SCENARIO    =   "dynamic_track_ivan" 
 RENDER = True #in BSC machines the render doesn't work
 PROGRESS_BAR = True #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
-HISTORY_LENGTH = 10
+HISTORY_LENGTH = 15
 
 def seeding(seed=1):
     np.random.seed(seed)
@@ -101,10 +101,14 @@ def main():
         #Systematic error with target depth equal to 15m.
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\070121_074006\model_dir\episode-576000.pt' #(PF) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a LSTM. Same as before but with -10 reward if landmark colision, but with extra tweeks. I took into acount the target depth to compute systematic error
         # [WORKS QUITE WELL] New test using a global reference instead of reference the landmark to the agent (aka substracting the position of the landmark - the position of the agent)
-        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\082421_053336\model_dir\episode-649000.pt' #(LS) has the previous tests, but with global reference. Change the line 171 by 173 in simple_track_ivan.py environment
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\082421_053336\model_dir\episode-649000.pt' #(LS) has the previous tests, but with global reference. Change the line 171 by 173 in simple_track_ivan.py environment
         # Tests using the new dynamic_tracking_ivan.py environment
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\082521_014212\model_dir\episode-624000.pt' #(LS) has the previous tests, but without global reference. The target moves linear at (0.05, 0.0) Line 186
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\082521_230203\model_dir\episode-799992.pt' #(LS) has the previous tests, but without global reference. The target moves randomly Line 188
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\082721_064041\model_dir\episode-799992.pt' #(LS) Target moves randomly. with a few differnet tweeks, but the main guan is maybe the reward function.
+        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\082721_093454\model_dir\episode-350000.pt' #(LS) Is the same configuration as the previous (just the previous) one but with a static target scenario
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\082721_093454\model_dir\episode-100000.pt' #(LS) Is the same configuration as the previous (just the previous) one but with a static target scenario (same but when the reward was greater)
+        
         
         
         aux = torch.load(trained_checkpoint)
@@ -165,7 +169,7 @@ def main():
         actions_for_env = np.rollaxis(actions_array,1)
         
         #TODO: I'm traying to do a cirlce path using my previous functions
-        # actions_for_env = circle_path(obs)
+        actions_for_env = circle_path(obs,55.) #if this value is bigger, the circle radius is smaller 60 => radi = 200m
         
         # send all actions to the environment
         next_obs, rewards, dones, info = env.step(actions_for_env)

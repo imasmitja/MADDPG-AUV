@@ -118,13 +118,22 @@ class Scenario(BaseScenario):
         
         dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks[:-world.num_landmarks]]
         
+        #For Test 11
         for dist in dists:
             rew += 10*np.exp(-1/2*(dist-0.1)**2/0.1)-9
-        
         if min(dists) > 1.5: #agent outside the world
             rew -= 10
         if min(dists) < 0.05: #is collision
             rew -= 10
+            
+        #For Test 10
+        dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks[:-world.num_landmarks]]
+        # if min(dists) > 1.5: #agent outside the world
+        #     rew -= 10
+        # if min(dists) < 0.05: #is collision
+        #     rew -= 1
+        # if min(dists) > 0.05 and min(dists) < 0.06: #is no collision but closer to target
+        #     rew += 2
             
         # for dist in dists:
         #     if dist > 0.06 and dist < 1.5:

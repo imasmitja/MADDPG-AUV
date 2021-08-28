@@ -119,15 +119,26 @@ class Scenario(BaseScenario):
                 world.error[i] = np.sqrt((l.pfxs[0]-world.landmarks[i].state.p_pos[0])**2+(l.pfxs[2]-world.landmarks[i].state.p_pos[1])**2) #Error from PF
             else:
                 world.error[i] = np.sqrt((l.lsxs[-1][0]-world.landmarks[i].state.p_pos[0])**2+(l.lsxs[-1][2]-world.landmarks[i].state.p_pos[1])**2) #Error from LS
-            rew -= world.error[i]*1.
+            rew -= world.error[i]*10
         
         dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks[:-world.num_landmarks]]
+        
+        #For previous tests
+        # if min(dists) > 1.5: #agent outside the world
+        #     rew -= 10
+        # if min(dists) < 0.05: #is collision
+        #     rew -= 1
+        # if min(dists) > 0.05 and min(dists) < 0.06: #is no collision but closer to target
+        #     rew += 2
+        
+        
+        #For Test 11
+        for dist in dists:
+            rew += 10*np.exp(-1/2*(dist-0.1)**2/0.1)-9
         if min(dists) > 1.5: #agent outside the world
             rew -= 10
         if min(dists) < 0.05: #is collision
-            rew -= 1
-        if min(dists) > 0.05 and min(dists) < 0.06: #is no collision but closer to target
-            rew += 2
+            rew -= 10
             
         if agent.collide:
             for a in world.agents:
@@ -216,6 +227,6 @@ class Scenario(BaseScenario):
         # episodes are done based on the agents minimum distance from a landmark.
         done = False
         dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks[:-world.num_landmarks]]
-        if min(dists) > 1.5:
+        if min(dists) > 1.5 or min(dists) < 0.05:
             done = True
         return done

@@ -100,7 +100,7 @@ def gumbel_softmax(logits, temperature=0.5, hard=False):
     return y
 
 # modified by Ivan, to see an agent doing circles around the predicted landmark position. To compere with a MADDPG trained agent.
-def circle_path(obs_all):
+def circle_path(obs_all,radius):
     # Set the movement of the mywg
     # Get parameters
     actions = np.array([[[]]])
@@ -114,7 +114,7 @@ def circle_path(obs_all):
             #Agent goes with a parabolic trajectory and does circumferences around the landmark with a radius each step shorter
             # radiu=0.005
             # maxangle = 1.
-            radius_size = 55. #if this value is bigger, the circle radius is smaller 60 => radi = 200m
+            radius_size = radius#55. #if this value is bigger, the circle radius is smaller 60 => radi = 200m
             angle = angle_agent_landmark + np.pi/2.-radius_size*np.pi/180.
             
             #Code to standerize the angle
