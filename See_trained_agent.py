@@ -158,7 +158,7 @@ def main():
     landmark_p_x = []
     landmark_p_y = []
     range_total = []
-    while t<400:
+    while t<100:
         frames.append(env.render('rgb_array'))
         t +=1
         # select an action
@@ -173,7 +173,16 @@ def main():
         actions_for_env = np.rollaxis(actions_array,1)
         
         #TODO: I'm traying to do a cirlce path using my previous functions
-        # actions_for_env = circle_path(obs,55.) #if this value is bigger, the circle radius is smaller 60 => radi = 200m
+        actions_for_env = circle_path(obs,25.) #if this value is bigger, the circle radius is smaller 60 => radi = 200m
+        actions_for_env = np.array([[[0.0,0.0]]])
+        if t  > 10:
+            actions_for_env = np.array([[[1.,1]]])
+        if t  > 20:
+            actions_for_env = np.array([[[1.,1]]])
+        if t  > 30:
+            actions_for_env = np.array([[[1.,1]]])
+        if t  > 40:
+            actions_for_env = np.array([[[-5.,1]]])
         
         # send all actions to the environment
         next_obs, rewards, dones, info = env.step(actions_for_env)

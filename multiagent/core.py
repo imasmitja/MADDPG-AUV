@@ -106,6 +106,7 @@ class World(object):
         self.num_agents = 3
         self.num_landmarks = 3
         self.collaborative = True
+        self.angle = 0
 
     # return all entities in the world
     @property
@@ -180,7 +181,21 @@ class World(object):
                 if speed > entity.max_speed:
                     entity.state.p_vel = entity.state.p_vel / np.sqrt(np.square(entity.state.p_vel[0]) +
                                                                   np.square(entity.state.p_vel[1])) * entity.max_speed
-            entity.state.p_pos += entity.state.p_vel * self.dt
+            # entity.state.p_pos += entity.state.p_vel * self.dt
+            
+            '''This is the new approach designed by Ivan'''
+            #First position of p_vel is the angular velocity which is used to increase the angle of the agent
+            self.angle += entity.state.p_vel[0]*self.dt
+            if self.angle > np.pi*2.:
+                self.angle -= np.pi*2.
+            if self.angle < -np.pi*2:
+                self.angle += np.pi*2
+            #The second position of p_vel is the liniar velocity of the agent
+            vel = entity.state.p_vel[1]+0.
+            if vel < 0:
+                vel = 0
+            #Finally, we increase the position (aka the agent) using the new angle and velocity.
+            entity.state.p_pos += np.array([vel*np.cos(self.angle),vel*np.sin(self.angle)]) * self.dt
 
     def update_agent_state(self, agent):
         # set communication state (directly for now)

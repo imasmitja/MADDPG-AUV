@@ -32,8 +32,10 @@ class Network(nn.Module):
             self.fc1 = nn.Linear(rnn_hidden_size+int(hidden_in_dim/2),hidden_in_dim)
             self.fc0 = nn.Linear(input_size,int(hidden_in_dim/2))
         self.fc2 = nn.Linear(hidden_in_dim,hidden_out_dim)
-        self.fc3 = nn.Linear(hidden_out_dim,output_dim)
+        self.fc3 = nn.Linear(hidden_out_dim,output_dim-1)
+        self.fc4 = nn.Linear(hidden_out_dim,1)
         self.nonlin = f.relu #leaky_relu
+        self.nonlin_tanh = torch.tanh #tanh
         self.actor = actor
         #self.reset_parameters()
 
@@ -43,6 +45,7 @@ class Network(nn.Module):
         self.fc1.weight.data.uniform_(*hidden_init(self.fc1))
         self.fc2.weight.data.uniform_(*hidden_init(self.fc2))
         self.fc3.weight.data.uniform_(-1e-3, 1e-3)
+        self.fc4.weight.data.uniform_(-1e-3, 1e-3)
 
     def forward(self, x1, x2):
         if self.actor:
@@ -60,13 +63,22 @@ class Network(nn.Module):
             # Linear
             h1 = self.nonlin(self.fc1(x))
             h2 = self.nonlin(self.fc2(h1))
-            h3 = (self.fc3(h2))
-            norm = torch.norm(h3)
+            h3 = self.nonlin_tanh(self.fc3(h2))
+            h4 = self.nonlin(self.fc4(h2))
             
             # h3 is a 2D vector (a force that is applied to the agent)
             # we bound the norm of the vector to be between 0 and 10
+            # norm = torch.norm(h3)
             # return 10.0*(torch.tanh(norm))*h3/norm if norm > 0 else 10*h3
-            return 1.0*(torch.tanh(norm))*h3/norm if norm > 0 else 1*h3
+            # return 1.0*(torch.tanh(norm))*h3/norm if norm > 0 else 1*h3
+            
+            #New configuration where we take into acount the angular velocity and forward velocity.
+            #h3 is the angular force applied to the agnet, due to the tanh activation layer, its bounded between -1 and 1, we reset these bounds to -10, 10.
+            h3 = h3*10.
+            #h4 is the forward force applied to the agent, we bound this to 1.
+            norm = torch.norm(h4)
+            h4 = 1.0*(torch.tanh(norm))*h4/norm if norm > 0 else 1.0*h4
+            return torch.cat((h3,h4), dim=1)
         
         else:
             # critic network simply outputs a number
@@ -83,8 +95,9 @@ class Network(nn.Module):
             # Linear
             h1 = self.nonlin(self.fc1(x))
             h2 = self.nonlin(self.fc2(h1))
-            h3 = (self.fc3(h2))
-            return h3
+            h3 = self.nonlin_tanh(self.fc3(h2))
+            h4 = self.nonlin(self.fc4(h2))
+            return torch.cat((h3,h4), dim=1)
 
 
 # from tensorboardX import SummaryWriter
