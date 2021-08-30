@@ -138,7 +138,7 @@ class Scenario(BaseScenario):
         if min(dists) > 1.5: #agent outside the world
             rew -= 10
         if min(dists) < 0.05: #is collision
-            rew -= 10
+            rew -= 2
             
         if agent.collide:
             for a in world.agents:

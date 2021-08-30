@@ -124,7 +124,7 @@ class Scenario(BaseScenario):
         if min(dists) > 1.5: #agent outside the world
             rew -= 10
         if min(dists) < 0.05: #is collision
-            rew -= 10
+            rew -= 2
             
         #For Test 10
         dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks[:-world.num_landmarks]]
@@ -213,6 +213,6 @@ class Scenario(BaseScenario):
         # episodes are done based on the agents minimum distance from a landmark.
         done = False
         dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks[:-world.num_landmarks]]
-        if min(dists) > 1.5 or min(dists) < 0.05:
+        if min(dists) > 1.5:
             done = True
         return done
