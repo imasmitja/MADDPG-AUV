@@ -36,12 +36,12 @@ BENCHMARK   =   True
 EXP_REP_BUF =   False     # Experienced replay buffer activation
 PRE_TRAINED =   True    # Use a previouse trained network as imput weights
 #Scenario used to train the networks
-# SCENARIO    =   "simple_track_ivan" 
-SCENARIO    =   "dynamic_track_ivan" 
+SCENARIO    =   "simple_track_ivan" 
+# SCENARIO    =   "dynamic_track_ivan" 
 RENDER = True #in BSC machines the render doesn't work
 PROGRESS_BAR = True #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
-HISTORY_LENGTH = 15
+HISTORY_LENGTH = 5
 
 def seeding(seed=1):
     np.random.seed(seed)
@@ -106,8 +106,12 @@ def main():
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\082521_014212\model_dir\episode-624000.pt' #(LS) has the previous tests, but without global reference. The target moves linear at (0.05, 0.0) Line 186
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\082521_230203\model_dir\episode-799992.pt' #(LS) has the previous tests, but without global reference. The target moves randomly Line 188
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\082721_064041\model_dir\episode-799992.pt' #(LS) Target moves randomly. with a few differnet tweeks, but the main guan is maybe the reward function.
-        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\082721_093454\model_dir\episode-350000.pt' #(LS) Is the same configuration as the previous (just the previous) one but with a static target scenario
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\082721_093454\model_dir\episode-350000.pt' #(LS) Is the same configuration as the previous (just the previous) one but with a static target scenario
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\082721_093454\model_dir\episode-100000.pt' #(LS) Is the same configuration as the previous (just the previous) one but with a static target scenario (same but when the reward was greater)
+        #New set of tests where I tried to eliminate different reward parts to see how it efects
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\083021_040458\model_dir\episode-400000.pt' #(LS) Static target, with a Gaussian reward function. without done if collision. with rew -= 2 if collision. length_his = 5
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\083021_040654\model_dir\episode-300000.pt' #(LS) Static target, with a Gaussian reward function. without done if collision. without rew -= 2 if collision. length_his = 5
+        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\083021_044518\model_dir\episode-350000.pt' #(LS) Static target, with a Gaussian reward function. without done if collision. without rew -= 2 if collision. without rew-=error between landmark estimation and true position. length_his = 5
         
         
         
@@ -169,7 +173,7 @@ def main():
         actions_for_env = np.rollaxis(actions_array,1)
         
         #TODO: I'm traying to do a cirlce path using my previous functions
-        actions_for_env = circle_path(obs,55.) #if this value is bigger, the circle radius is smaller 60 => radi = 200m
+        # actions_for_env = circle_path(obs,55.) #if this value is bigger, the circle radius is smaller 60 => radi = 200m
         
         # send all actions to the environment
         next_obs, rewards, dones, info = env.step(actions_for_env)
