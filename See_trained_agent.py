@@ -41,7 +41,7 @@ SCENARIO    =   "simple_track_ivan"
 RENDER = True #in BSC machines the render doesn't work
 PROGRESS_BAR = True #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
-HISTORY_LENGTH = 5
+HISTORY_LENGTH = 10
 
 def seeding(seed=1):
     np.random.seed(seed)
@@ -160,7 +160,7 @@ def main():
     landmark_p_x = []
     landmark_p_y = []
     range_total = []
-    while t<300:
+    while t<80:
         frames.append(env.render('rgb_array'))
         t +=1
         # select an action
@@ -171,23 +171,28 @@ def main():
         # actions = maddpg.act(transpose_to_tensor(history), noise=0.) 
         actions = maddpg.act(his,transpose_to_tensor(obs) , noise=0.) 
         
-        print('actions=',actions)
+        # print('actions=',actions)
          
         actions_array = torch.stack(actions).detach().numpy()
         actions_for_env = np.rollaxis(actions_array,1)
         
-        #TODO: I'm traying to do a cirlce path using my previous functions
-        # actions_for_env = circle_path(obs,25.) #if this value is bigger, the circle radius is smaller 60 => radi = 200m
+        #cirlce path using my previous functions
+        actions_for_env = circle_path(obs,65.) #if this value is bigger, the circle radius is smaller 60 => radi = 200m
+        print('actions=',actions_for_env)
+        
         
         # actions_for_env = np.array([[[0.0,0.0]]])
         # if t  > 10:
-        #     actions_for_env = np.array([[[1.,0.5]]])
+        #     actions_for_env = np.array([[[0.,0.1]]])
         # if t  > 20:
-        #     actions_for_env = np.array([[[1.,0.5]]])
+        #     actions_for_env = np.array([[[0.,0.1]]])
         # if t  > 30:
-        #     actions_for_env = np.array([[[1.,0.5]]])
+        #     actions_for_env = np.array([[[0.,0.1]]])
         # if t  > 40:
-        #     actions_for_env = np.array([[[-0.1,0.5]]])
+        #     actions_for_env = np.array([[[1.,0.1]]])
+        
+        #see a random agent
+        # actions_for_env = np.array([[np.random.rand(2)*2-1]])
         
         # send all actions to the environment
         next_obs, rewards, dones, info = env.step(actions_for_env)

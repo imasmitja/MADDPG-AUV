@@ -153,7 +153,7 @@ class MADDPG:
         
         # Minimize the loss
         critic_loss.backward()
-        torch.nn.utils.clip_grad_norm_(agent.critic.parameters(), 0.5)
+        torch.nn.utils.clip_grad_norm_(agent.critic.parameters(), 1.0)
         agent.critic_optimizer.step()
 
         # ---------------------------- update actor ---------------------------- #
@@ -184,7 +184,7 @@ class MADDPG:
         
         # Minimize the loss
         actor_loss.backward()
-        torch.nn.utils.clip_grad_norm_(agent.actor.parameters(),0.5)
+        torch.nn.utils.clip_grad_norm_(agent.actor.parameters(),1.0)
         agent.actor_optimizer.step()
 
         al = actor_loss.cpu().detach().item()

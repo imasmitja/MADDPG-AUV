@@ -120,7 +120,7 @@ class Scenario(BaseScenario):
         
         #For Test 11
         for dist in dists:
-            rew += 10*np.exp(-1/2*(dist-0.1)**2/0.1)-9
+            rew += 10*np.exp(-1/2*(dist-0.1)**2/0.1)-10
         if min(dists) > 1.5: #agent outside the world
             rew -= 10
         # if min(dists) < 0.05: #is collision
