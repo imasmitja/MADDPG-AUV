@@ -35,7 +35,8 @@ class Network(nn.Module):
         
         #old configuration
         self.fc3 = nn.Linear(hidden_out_dim,output_dim)
-        #new configuration
+        
+        # #new configuration
         # self.fc3 = nn.Linear(hidden_out_dim,output_dim-1)
         # self.fc4 = nn.Linear(hidden_out_dim,1)
         
@@ -50,7 +51,7 @@ class Network(nn.Module):
         self.fc1.weight.data.uniform_(*hidden_init(self.fc1))
         self.fc2.weight.data.uniform_(*hidden_init(self.fc2))
         self.fc3.weight.data.uniform_(-1e-3, 1e-3)
-        self.fc4.weight.data.uniform_(-1e-3, 1e-3)
+        # self.fc4.weight.data.uniform_(-1e-3, 1e-3)
 
     def forward(self, x1, x2):
         if self.actor:
@@ -81,10 +82,11 @@ class Network(nn.Module):
             # h3 = self.nonlin_tanh(self.fc3(h2))
             # h4 = self.nonlin(self.fc4(h2))
             # #h3 is the angular force applied to the agnet, due to the tanh activation layer, its bounded between -1 and 1, we reset these bounds to -10, 10.
-            # h3 = h3*10.
+            # norm3 = torch.norm(h3)
+            # h3 = 1.0*(torch.tanh(norm3))*h3/norm3 if norm3 > 0 else 1.0*h3
             # #h4 is the forward force applied to the agent, we bound this to 1.
-            # norm = torch.norm(h4)
-            # h4 = 1.0*(torch.tanh(norm))*h4/norm if norm > 0 else 1.0*h4
+            # norm4 = torch.norm(h4)
+            # h4 = 1.0*(torch.tanh(norm4))*h4/norm4 if norm4 > 0 else 1.0*h4
             # return torch.cat((h3,h4), dim=1)
         
         else:
@@ -106,7 +108,8 @@ class Network(nn.Module):
             #old configuration
             h3 = (self.fc3(h2))
             return h3
-            #new configuration
+        
+            # #new configuration
             # h3 = self.nonlin_tanh(self.fc3(h2))
             # h4 = self.nonlin(self.fc4(h2))
             # return torch.cat((h3,h4), dim=1)

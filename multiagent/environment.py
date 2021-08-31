@@ -196,7 +196,7 @@ class MultiAgentEnv(gym.Env):
                     agent.action.u[1] += action[0][3] - action[0][4]
                 else:
                     agent.action.u = action[0]
-            sensitivity = 5. #The sensitivity was 1 in udacity, but 5 in openAI
+            sensitivity = np.array([25.,5.]) #The sensitivity was 1 in udacity, but 5 in openAI
             if agent.accel is not None:
                 sensitivity = agent.accel
             agent.action.u *= sensitivity

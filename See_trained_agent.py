@@ -111,7 +111,9 @@ def main():
         #New set of tests where I tried to eliminate different reward parts to see how it efects
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\083021_040458\model_dir\episode-400000.pt' #(LS) Static target, with a Gaussian reward function. without done if collision. with rew -= 2 if collision. length_his = 5
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\083021_040654\model_dir\episode-300000.pt' #(LS) Static target, with a Gaussian reward function. without done if collision. without rew -= 2 if collision. length_his = 5
-        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\083021_044518\model_dir\episode-350000.pt' #(LS) Static target, with a Gaussian reward function. without done if collision. without rew -= 2 if collision. without rew-=error between landmark estimation and true position. length_his = 5
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\083021_044518\model_dir\episode-350000.pt' #(LS) Static target, with a Gaussian reward function. without done if collision. without rew -= 2 if collision. without rew-=error between landmark estimation and true position. length_his = 5
+        #New set of tests where I tried a new approach. Here the first parameter of p_vel is the angular velocity and the second is the forward velocity of the agent.
+        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\083121_021445\model_dir\episode-550000.pt' #(LS) Static target, with a Gaussian reward function. without done if collision. without rew -= 2 if collision. without rew-=error between landmark estimation and true position. length_his = 5. New DNN architecture
         
         
         
@@ -168,21 +170,24 @@ def main():
         # actions = maddpg.act(transpose_to_tensor(obs), noise=0.)       
         # actions = maddpg.act(transpose_to_tensor(history), noise=0.) 
         actions = maddpg.act(his,transpose_to_tensor(obs) , noise=0.) 
+        
+        print('actions=',actions)
          
         actions_array = torch.stack(actions).detach().numpy()
         actions_for_env = np.rollaxis(actions_array,1)
         
         #TODO: I'm traying to do a cirlce path using my previous functions
-        actions_for_env = circle_path(obs,25.) #if this value is bigger, the circle radius is smaller 60 => radi = 200m
+        # actions_for_env = circle_path(obs,25.) #if this value is bigger, the circle radius is smaller 60 => radi = 200m
+        
         actions_for_env = np.array([[[0.0,0.0]]])
         if t  > 10:
-            actions_for_env = np.array([[[1.,1]]])
+            actions_for_env = np.array([[[1.,0.1]]])
         if t  > 20:
-            actions_for_env = np.array([[[1.,1]]])
+            actions_for_env = np.array([[[1.,0.1]]])
         if t  > 30:
-            actions_for_env = np.array([[[1.,1]]])
+            actions_for_env = np.array([[[1.,0.1]]])
         if t  > 40:
-            actions_for_env = np.array([[[-5.,1]]])
+            actions_for_env = np.array([[[-0.1,0.1]]])
         
         # send all actions to the environment
         next_obs, rewards, dones, info = env.step(actions_for_env)
