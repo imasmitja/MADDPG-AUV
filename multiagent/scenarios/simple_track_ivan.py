@@ -55,6 +55,7 @@ class Scenario(BaseScenario):
         for agent in world.agents:
             agent.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
             agent.state.p_vel = np.zeros(world.dim_p)
+            agent.state.p_vel_old = np.zeros(world.dim_p)
             agent.state.c = np.zeros(world.dim_c)
         for i, landmark in enumerate(world.landmarks):
             if i < world.num_landmarks:
@@ -140,6 +141,10 @@ class Scenario(BaseScenario):
         #         rew += 1-dist
         # if min(dists) > 0.05 and min(dists) < 0.06: #is no collision but closer to target
         #     rew += (1-dist)*2
+        
+        #reward based on increment of action (from paper ieeeAccess) done in test 25
+        inc_action = agent.state.p_vel_old - agent.state.p_vel
+        rew -= 5*np.sqrt(inc_action[0]**2+inc_action[1]**2)
             
         if agent.collide:
             for a in world.agents:
