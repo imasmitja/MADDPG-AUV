@@ -34,11 +34,14 @@ class Network(nn.Module):
         self.fc2 = nn.Linear(hidden_in_dim,hidden_out_dim)
         
         #old configuration
-        self.fc3 = nn.Linear(hidden_out_dim,output_dim)
+        # self.fc3 = nn.Linear(hidden_out_dim,output_dim)
         
         # #new configuration
         # self.fc3 = nn.Linear(hidden_out_dim,output_dim-1)
         # self.fc4 = nn.Linear(hidden_out_dim,1)
+        
+        #new configuration test 24
+        self.fc3 = nn.Linear(hidden_in_dim,output_dim)
         
         self.nonlin = f.relu #leaky_relu
         self.nonlin_tanh = torch.tanh #tanh
@@ -68,15 +71,15 @@ class Network(nn.Module):
             x = torch.cat((out,h00), dim=1)
             # Linear
             h1 = self.nonlin(self.fc1(x))
-            h2 = self.nonlin(self.fc2(h1))
+            # h2 = self.nonlin(self.fc2(h1)) #not used in test 24
             
-            #old configuration
-            h3 = (self.fc3(h2))
-            # h3 is a 2D vector (a force that is applied to the agent)
-            # we bound the norm of the vector to be between 0 and 10
-            norm = torch.norm(h3)
-            # return 10.0*(torch.tanh(norm))*h3/norm if norm > 0 else 10*h3
-            return 1.0*(torch.tanh(norm))*h3/norm if norm > 0 else 1*h3
+            # #old configuration
+            # h3 = (self.fc3(h2))
+            # # h3 is a 2D vector (a force that is applied to the agent)
+            # # we bound the norm of the vector to be between 0 and 10
+            # norm = torch.norm(h3)
+            # # return 10.0*(torch.tanh(norm))*h3/norm if norm > 0 else 10*h3
+            # return 1.0*(torch.tanh(norm))*h3/norm if norm > 0 else 1*h3
             
             # #New configuration where we take into acount the angular velocity and forward velocity.
             # h3 = self.nonlin_tanh(self.fc3(h2))
@@ -88,6 +91,14 @@ class Network(nn.Module):
             # norm4 = torch.norm(h4)
             # h4 = 1.0*(torch.tanh(norm4))*h4/norm4 if norm4 > 0 else 1.0*h4
             # return torch.cat((h3,h4), dim=1)
+            
+            #New configuration used in test 24
+            h3 = (self.fc3(h1))
+            # h3 is a 2D vector (a force that is applied to the agent)
+            # we bound the norm of the vector to be between 0 and 10
+            norm = torch.norm(h3)
+            # return 10.0*(torch.tanh(norm))*h3/norm if norm > 0 else 10*h3
+            return 1.0*(torch.tanh(norm))*h3/norm if norm > 0 else 1*h3
         
         else:
             # critic network simply outputs a number
@@ -103,16 +114,21 @@ class Network(nn.Module):
             x = torch.cat((out,h00), dim=1)
             # Linear
             h1 = self.nonlin(self.fc1(x))
-            h2 = self.nonlin(self.fc2(h1))
+            # h2 = self.nonlin(self.fc2(h1)) #not used in test 24
             
-            #old configuration
-            h3 = (self.fc3(h2))
-            return h3
+            # #old configuration
+            # h3 = (self.fc3(h2))
+            # return h3
         
             # #new configuration
             # h3 = self.nonlin_tanh(self.fc3(h2))
             # h4 = self.nonlin(self.fc4(h2))
             # return torch.cat((h3,h4), dim=1)
+            
+            #New configuration used in test 24
+            h3 = (self.fc3(h1))
+            return h3
+
 
 
 # from tensorboardX import SummaryWriter
