@@ -33,7 +33,7 @@ class Network(nn.Module):
             self.fc0 = nn.Linear(input_size,int(hidden_in_dim/2))
         self.fc2 = nn.Linear(hidden_in_dim,hidden_out_dim)
         
-        #old configuration
+        # #old configuration
         # self.fc3 = nn.Linear(hidden_out_dim,output_dim)
         
         # #new configuration

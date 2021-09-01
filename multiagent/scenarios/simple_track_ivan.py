@@ -121,14 +121,14 @@ class Scenario(BaseScenario):
         
         #For Test 11
         for dist in dists:
-            rew += 10*np.exp(-1/2*(dist-0.1)**2/0.1)-10
+            rew += 10*np.exp(-1/2*(dist-0.1)**2/0.1)-5
         if min(dists) > 1.5: #agent outside the world
-            rew -= 10
-        # if min(dists) < 0.05: #is collision
-        #     rew -= 2
+            rew -= 100
+        if min(dists) < 0.05: #is collision
+            rew += 100
             
         #For Test 10
-        dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks[:-world.num_landmarks]]
+        # dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks[:-world.num_landmarks]]
         # if min(dists) > 1.5: #agent outside the world
         #     rew -= 10
         # if min(dists) < 0.05: #is collision
@@ -144,7 +144,7 @@ class Scenario(BaseScenario):
         
         #reward based on increment of action (from paper ieeeAccess) done in test 25
         inc_action = agent.state.p_vel_old - agent.state.p_vel
-        rew -= 5*np.sqrt(inc_action[0]**2+inc_action[1]**2)
+        rew -= 0.1*np.sqrt(inc_action[0]**2+inc_action[1]**2)
             
         if agent.collide:
             for a in world.agents:
@@ -218,6 +218,6 @@ class Scenario(BaseScenario):
         # episodes are done based on the agents minimum distance from a landmark.
         done = False
         dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks[:-world.num_landmarks]]
-        if min(dists) > 1.5:
+        if min(dists) > 1.5 and min(dists) < 0.05:
             done = True
         return done

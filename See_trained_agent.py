@@ -26,12 +26,12 @@ BUFFER_SIZE =   int(1e6) # Replay buffer size
 BATCH_SIZE  =   512      # Mini batch size
 GAMMA       =   0.95     # Discount factor
 TAU         =   0.01     # For soft update of target parameters 
-LR_ACTOR    =   1e-2     # Learning rate of the actor
+LR_ACTOR    =   1e-3     # Learning rate of the actor
 LR_CRITIC   =   1e-3     # Learning rate of the critic
 WEIGHT_DECAY =  0 #1e-5     # L2 weight decay
 UPDATE_EVERY =  30       # How many steps to take before updating target networks
 UPDATE_TIMES =  20       # Number of times we update the networks
-SEED = 834390                # Seed for random numbers
+SEED = 1919819   #198                # Seed for random numbers
 BENCHMARK   =   True
 EXP_REP_BUF =   False     # Experienced replay buffer activation
 PRE_TRAINED =   True    # Use a previouse trained network as imput weights
@@ -113,8 +113,10 @@ def main():
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\083021_040654\model_dir\episode-300000.pt' #(LS) Static target, with a Gaussian reward function. without done if collision. without rew -= 2 if collision. length_his = 5
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\083021_044518\model_dir\episode-350000.pt' #(LS) Static target, with a Gaussian reward function. without done if collision. without rew -= 2 if collision. without rew-=error between landmark estimation and true position. length_his = 5
         #New set of tests where I tried a new approach. Here the first parameter of p_vel is the angular velocity and the second is the forward velocity of the agent.
-        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\083121_021445\model_dir\episode-550000.pt' #(LS) Static target, with a Gaussian reward function. without done if collision. without rew -= 2 if collision. without rew-=error between landmark estimation and true position. length_his = 5. New DNN architecture
-        
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\083121_021445\model_dir\episode-550000.pt' #(LS) Static target, with a Gaussian reward function. without done if collision. without rew -= 2 if collision. without rew-=error between landmark estimation and true position. length_his = 5. New DNN architecture
+        #New set of tests where I did a stepbackwards and returned to the original action shape
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090121_020510\model_dir\episode-700000.pt' #test 23
+        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090121_053440\model_dir\episode-500000.pt' #test 24, as test 23 but I delated one of the hiden layers of DNN.
         
         
         aux = torch.load(trained_checkpoint)
@@ -177,8 +179,8 @@ def main():
         actions_for_env = np.rollaxis(actions_array,1)
         
         #cirlce path using my previous functions
-        actions_for_env = circle_path(obs,65.) #if this value is bigger, the circle radius is smaller 60 => radi = 200m
-        print('actions=',actions_for_env)
+        # actions_for_env = circle_path(obs,65.) #if this value is bigger, the circle radius is smaller 60 => radi = 200m
+        # print('actions=',actions_for_env)
         
         
         # actions_for_env = np.array([[[0.0,0.0]]])
@@ -235,8 +237,8 @@ def main():
             
     plt.figure(figsize=(5,5))
     plt.plot(steps,total_rewards,'bo-')
-    plt.xlabel('Rewards')
-    plt.ylabel('Steps')
+    plt.ylabel('Rewards')
+    plt.xlabel('Steps')
     plt.title('Trained agent (RL)')
     # plt.title('Predefined cricumference')
     plt.show()
@@ -255,8 +257,8 @@ def main():
     
     plt.figure(figsize=(5,5))
     plt.plot(steps,range_total,'bo-')
-    plt.xlabel('Range')
-    plt.ylabel('Steps')
+    plt.ylabel('Range')
+    plt.xlabel('Steps')
     plt.title('Trained agent (RL)')
     # plt.title('Predefined cricumference')
     plt.show()

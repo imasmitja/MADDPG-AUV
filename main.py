@@ -16,9 +16,9 @@ import copy
 # for saving gif
 import imageio
 
-BUFFER_SIZE =   int(1e6) # Replay buffer size
-BATCH_SIZE  =   512      # Mini batch size
-GAMMA       =   0.95     # Discount factor
+BUFFER_SIZE =   4000 #int(1e6) # Replay buffer size
+BATCH_SIZE  =   32 #512      # Mini batch size
+GAMMA       =   0.9 #0.95     # Discount factor
 TAU         =   0.01     # For soft update of target parameters 
 LR_ACTOR    =   1e-3     # Learning rate of the actor
 LR_CRITIC   =   1e-3     # Learning rate of the critic
