@@ -22,16 +22,16 @@ import matplotlib.pyplot as plt
 # for saving gif
 import imageio
 
-BUFFER_SIZE =   int(1e6) # Replay buffer size
-BATCH_SIZE  =   512      # Mini batch size
-GAMMA       =   0.95     # Discount factor
+BUFFER_SIZE =   4000 # int(1e6) # Replay buffer size
+BATCH_SIZE  =   32 #512      # Mini batch size
+GAMMA       =   0.9 #0.95     # Discount factor
 TAU         =   0.01     # For soft update of target parameters 
 LR_ACTOR    =   1e-3     # Learning rate of the actor
 LR_CRITIC   =   1e-3     # Learning rate of the critic
 WEIGHT_DECAY =  0 #1e-5     # L2 weight decay
 UPDATE_EVERY =  30       # How many steps to take before updating target networks
 UPDATE_TIMES =  20       # Number of times we update the networks
-SEED = 1919819   #198                # Seed for random numbers
+SEED = 19238   #198                # Seed for random numbers
 BENCHMARK   =   True
 EXP_REP_BUF =   False     # Experienced replay buffer activation
 PRE_TRAINED =   True    # Use a previouse trained network as imput weights
@@ -41,7 +41,7 @@ SCENARIO    =   "simple_track_ivan"
 RENDER = True #in BSC machines the render doesn't work
 PROGRESS_BAR = True #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
-HISTORY_LENGTH = 10
+HISTORY_LENGTH = 5
 
 def seeding(seed=1):
     np.random.seed(seed)
@@ -80,44 +80,9 @@ def main():
         # trained_checkpoint = r'E:\Ivan\UPC\UDACITY\DRL_Nanodegree\Part4\MADDPG\041321_204450\model_dir\episode-196002.pt' #test1 6 agents new new reward function new positive reward and pretrined 
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\051021_140623\model_dir\episode-107000.pt' #first test with PF with one agent and one landmark
         
-        #New tests with PF and LS simple_track_ivan.py 
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\061721_144815\model_dir\episode-399992.pt' #first test with LS with one agent and one landmark (episode_length=35) This works better, it has learned to stay close to the landmark and make small movements to maintain the error.
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\061721_222642\model_dir\episode-399006.pt' #second test with LS with one agent and one landmark (episode_length=60) This works a little worst than the previouse, it has a similar behaviour, but it moves lower, and therefore, the error is greater.
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\061821_105753\model_dir\episode-399992.pt' #third test with LS with one agent and one landmark (episode_length=35) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. It works prety well
-        # RNN
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\062121_143934\model_dir\episode-399992.pt' #First test with LS with one agent and one landmark (episode_length=35) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a RNN
-        # GRU
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\062221_065153\model_dir\episode-399992.pt' #First test with LS with one agent and one landmark (episode_length=35) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a GRU
-        # LSTM
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\062221_110542\model_dir\episode-399992.pt' #First test with LS with one agent and one landmark (episode_length=35) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a LSTM
-        # new LSTM + MADDPG architecture form ""memory-based deep reinforcement learning for pomdp"
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\062521_081806\model_dir\episode-399992.pt' #First test with LS with one agent and one landmark (episode_length=35) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a LSTM
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\062521_232232\model_dir\episode-399992.pt' #First test with LS with one agent and one landmark (episode_length=35) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a LSTM. Same as before but with -10 reward if landmark colision
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\062621_120243\model_dir\episode-799992.pt' #First test with LS with one agent and one landmark (episode_length=35) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a LSTM. Same as before but with -10 reward if landmark colision, but with extra tweeks
-        #Systematic error with target depth equal to 1500 m.
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\062821_075229\model_dir\episode-799992.pt' #(LS) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a LSTM. Same as before but with -10 reward if landmark colision, but with extra tweeks. I took into acount the target depth to compute systematic error
-        # [WORKS QUITE WELL]trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\070121_091727\model_dir\episode-633000.pt' #(LS) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a LSTM. Same as before but with -10 reward if landmark colision, but with extra tweeks. I took into acount the target depth to compute systematic error, as the previous but with history length = 50
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\062821_092548\model_dir\episode-799992.pt' #(PF) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a LSTM. Same as before but with -10 reward if landmark colision, but with extra tweeks. I took into acount the target depth to compute systematic error
-        #Systematic error with target depth equal to 15m.
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\070121_074006\model_dir\episode-576000.pt' #(PF) In this case, the observation state is the estimated landmark position instead of the true landmark position as the two previous tests. In addition, I implemented a LSTM. Same as before but with -10 reward if landmark colision, but with extra tweeks. I took into acount the target depth to compute systematic error
-        # [WORKS QUITE WELL] New test using a global reference instead of reference the landmark to the agent (aka substracting the position of the landmark - the position of the agent)
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\082421_053336\model_dir\episode-649000.pt' #(LS) has the previous tests, but with global reference. Change the line 171 by 173 in simple_track_ivan.py environment
-        # Tests using the new dynamic_tracking_ivan.py environment
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\082521_014212\model_dir\episode-624000.pt' #(LS) has the previous tests, but without global reference. The target moves linear at (0.05, 0.0) Line 186
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\082521_230203\model_dir\episode-799992.pt' #(LS) has the previous tests, but without global reference. The target moves randomly Line 188
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\082721_064041\model_dir\episode-799992.pt' #(LS) Target moves randomly. with a few differnet tweeks, but the main guan is maybe the reward function.
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\082721_093454\model_dir\episode-350000.pt' #(LS) Is the same configuration as the previous (just the previous) one but with a static target scenario
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\082721_093454\model_dir\episode-100000.pt' #(LS) Is the same configuration as the previous (just the previous) one but with a static target scenario (same but when the reward was greater)
-        #New set of tests where I tried to eliminate different reward parts to see how it efects
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\083021_040458\model_dir\episode-400000.pt' #(LS) Static target, with a Gaussian reward function. without done if collision. with rew -= 2 if collision. length_his = 5
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\083021_040654\model_dir\episode-300000.pt' #(LS) Static target, with a Gaussian reward function. without done if collision. without rew -= 2 if collision. length_his = 5
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\083021_044518\model_dir\episode-350000.pt' #(LS) Static target, with a Gaussian reward function. without done if collision. without rew -= 2 if collision. without rew-=error between landmark estimation and true position. length_his = 5
-        #New set of tests where I tried a new approach. Here the first parameter of p_vel is the angular velocity and the second is the forward velocity of the agent.
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\083121_021445\model_dir\episode-550000.pt' #(LS) Static target, with a Gaussian reward function. without done if collision. without rew -= 2 if collision. without rew-=error between landmark estimation and true position. length_his = 5. New DNN architecture
-        #New set of tests where I did a stepbackwards and returned to the original action shape
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090121_020510\model_dir\episode-700000.pt' #test 23
-        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090121_053440\model_dir\episode-500000.pt' #test 24, as test 23 but I delated one of the hiden layers of DNN.
-        
+        #New tests with LS simple_track_ivan.py using the new network, which is simplified and parametres based on IEEEAccess paper as well as their rewards functions (more or less)
+        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090121_151545\model_dir\episode-350000.pt' #first test with LS with one agent and one landmark (episode_length=35) This works better, it has learned to stay close to the landmark and make small movements to maintain the error.
+
         
         aux = torch.load(trained_checkpoint)
         for i in range(num_agents):  

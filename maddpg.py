@@ -24,17 +24,32 @@ class MADDPG:
         #                      DDPGAgent(18, 64, 32, 2, 24, 64, 32, lr_actor=lr_actor, lr_critic=lr_critic, weight_decay=weight_decay)]
         #layers configuration
         # in_actor = num_landmarks*2 + (num_agents-1)*2 + 2+2 #x-y of landmarks + x-y of others + x-y and x-y velocity of current agent
+        
+        # #old configuraiton
+        # in_actor = num_landmarks*2 + (num_agents-1)*2 + 2+2 + num_landmarks + 2 #x-y of landmarks + x-y of others + x-y and x-y velocity of current agent + range to landmarks + 2 actions
+        # hidden_in_actor = in_actor*15
+        # hidden_out_actor = int(hidden_in_actor/2)
+        # out_actor = 2 #each agent have 2 continuous actions on x-y plane
+        # in_critic = in_actor * num_agents # the critic input is all agents concatenated
+        # hidden_in_critic = in_critic * 15 + out_actor * num_agents
+        # hidden_out_critic = int(hidden_in_critic/2)
+        # #RNN
+        # rnn_num_layers = 2 #two stacked RNN to improve the performance (default = 1)
+        # rnn_hidden_size_actor = hidden_in_actor
+        # rnn_hidden_size_critic = hidden_in_critic - out_actor * num_agents
+        
+        #New configuration test 27
         in_actor = num_landmarks*2 + (num_agents-1)*2 + 2+2 + num_landmarks + 2 #x-y of landmarks + x-y of others + x-y and x-y velocity of current agent + range to landmarks + 2 actions
-        hidden_in_actor = in_actor*15
+        hidden_in_actor = 32
         hidden_out_actor = int(hidden_in_actor/2)
         out_actor = 2 #each agent have 2 continuous actions on x-y plane
         in_critic = in_actor * num_agents # the critic input is all agents concatenated
-        hidden_in_critic = in_critic * 15 + out_actor * num_agents
+        hidden_in_critic = 32
         hidden_out_critic = int(hidden_in_critic/2)
         #RNN
         rnn_num_layers = 2 #two stacked RNN to improve the performance (default = 1)
-        rnn_hidden_size_actor = hidden_in_actor
-        rnn_hidden_size_critic = hidden_in_critic - out_actor * num_agents
+        rnn_hidden_size_actor = 64
+        rnn_hidden_size_critic = 64
         
         
         
@@ -43,11 +58,13 @@ class MADDPG:
         print('Hidden 1st layer nodes number: ',hidden_in_actor)
         print('Hidden 2nd layer nodes number: ',hidden_out_actor)
         print('Output nodes number:           ',out_actor)
+        print('RNN hidden size actor :        ',rnn_hidden_size_actor)
         print('Critic NN configuration:')
         print('Input nodes number:            ',in_critic)
         print('Hidden 1st layer nodes number: ',hidden_in_critic)
         print('Hidden 2nd layer nodes number: ',hidden_out_critic)
         print('Output nodes number:           ',out_actor)
+        print('RNN hidden size critic:        ',rnn_hidden_size_critic)
         
         self.maddpg_agent = [DDPGAgent(in_actor, hidden_in_actor, hidden_out_actor, out_actor, in_critic, hidden_in_critic, hidden_out_critic, rnn_num_layers, rnn_hidden_size_actor, rnn_hidden_size_critic, lr_actor=lr_actor, lr_critic=lr_critic, weight_decay=weight_decay, device=device) for _ in range(num_agents)]
         # self.maddpg_agent = [DDPGAgent(14, 128, 128, 2, 48, 128, 128, lr_actor=lr_actor, lr_critic=lr_critic, weight_decay=weight_decay, device=device) for _ in range(num_agents)]
@@ -153,7 +170,7 @@ class MADDPG:
         
         # Minimize the loss
         critic_loss.backward()
-        torch.nn.utils.clip_grad_norm_(agent.critic.parameters(), 1.0)
+        torch.nn.utils.clip_grad_norm_(agent.critic.parameters(), 0.5)
         agent.critic_optimizer.step()
 
         # ---------------------------- update actor ---------------------------- #
@@ -184,7 +201,7 @@ class MADDPG:
         
         # Minimize the loss
         actor_loss.backward()
-        torch.nn.utils.clip_grad_norm_(agent.actor.parameters(),1.0)
+        torch.nn.utils.clip_grad_norm_(agent.actor.parameters(),0.5)
         agent.actor_optimizer.step()
 
         al = actor_loss.cpu().detach().item()

@@ -26,22 +26,12 @@ class Network(nn.Module):
         
         # Linear NN layers
         if actor == True:
-            self.fc1 = nn.Linear(rnn_hidden_size+int(hidden_in_dim/2),hidden_in_dim)
-            self.fc0 = nn.Linear(input_size - 2 ,int(hidden_in_dim/2))
+            self.fc1 = nn.Linear(rnn_hidden_size*2,hidden_in_dim)
+            self.fc0 = nn.Linear(input_size - 2 ,rnn_hidden_size)
         else:
-            self.fc1 = nn.Linear(rnn_hidden_size+int(hidden_in_dim/2),hidden_in_dim)
-            self.fc0 = nn.Linear(input_size,int(hidden_in_dim/2))
-        self.fc2 = nn.Linear(hidden_in_dim,hidden_out_dim)
-        
-        # #old configuration
-        # self.fc3 = nn.Linear(hidden_out_dim,output_dim)
-        
-        # #new configuration
-        # self.fc3 = nn.Linear(hidden_out_dim,output_dim-1)
-        # self.fc4 = nn.Linear(hidden_out_dim,1)
-        
-        #new configuration test 24
-        self.fc3 = nn.Linear(hidden_in_dim,output_dim)
+            self.fc1 = nn.Linear(rnn_hidden_size*2,hidden_in_dim)
+            self.fc0 = nn.Linear(input_size,rnn_hidden_size)        
+        self.fc2 = nn.Linear(hidden_in_dim,output_dim)
         
         self.nonlin = f.relu #leaky_relu
         self.nonlin_tanh = torch.tanh #tanh
@@ -53,8 +43,6 @@ class Network(nn.Module):
         self.fc0.weight.data.uniform_(*hidden_init(self.fc0))
         self.fc1.weight.data.uniform_(*hidden_init(self.fc1))
         self.fc2.weight.data.uniform_(*hidden_init(self.fc2))
-        self.fc3.weight.data.uniform_(-1e-3, 1e-3)
-        # self.fc4.weight.data.uniform_(-1e-3, 1e-3)
 
     def forward(self, x1, x2):
         if self.actor:
@@ -71,34 +59,13 @@ class Network(nn.Module):
             x = torch.cat((out,h00), dim=1)
             # Linear
             h1 = self.nonlin(self.fc1(x))
-            # h2 = self.nonlin(self.fc2(h1)) #not used in test 24
-            
-            # #old configuration
-            # h3 = (self.fc3(h2))
-            # # h3 is a 2D vector (a force that is applied to the agent)
-            # # we bound the norm of the vector to be between 0 and 10
-            # norm = torch.norm(h3)
-            # # return 10.0*(torch.tanh(norm))*h3/norm if norm > 0 else 10*h3
-            # return 1.0*(torch.tanh(norm))*h3/norm if norm > 0 else 1*h3
-            
-            # #New configuration where we take into acount the angular velocity and forward velocity.
-            # h3 = self.nonlin_tanh(self.fc3(h2))
-            # h4 = self.nonlin(self.fc4(h2))
-            # #h3 is the angular force applied to the agnet, due to the tanh activation layer, its bounded between -1 and 1, we reset these bounds to -10, 10.
-            # norm3 = torch.norm(h3)
-            # h3 = 1.0*(torch.tanh(norm3))*h3/norm3 if norm3 > 0 else 1.0*h3
-            # #h4 is the forward force applied to the agent, we bound this to 1.
-            # norm4 = torch.norm(h4)
-            # h4 = 1.0*(torch.tanh(norm4))*h4/norm4 if norm4 > 0 else 1.0*h4
-            # return torch.cat((h3,h4), dim=1)
-            
-            #New configuration used in test 24
-            h3 = (self.fc3(h1))
-            # h3 is a 2D vector (a force that is applied to the agent)
+            h2 = (self.fc2(h1))
+            # return h2
+            # h2 is a 2D vector (a force that is applied to the agent)
             # we bound the norm of the vector to be between 0 and 10
-            norm = torch.norm(h3)
-            # return 10.0*(torch.tanh(norm))*h3/norm if norm > 0 else 10*h3
-            return 1.0*(torch.tanh(norm))*h3/norm if norm > 0 else 1*h3
+            norm = torch.norm(h2)
+            # return 10.0*(torch.tanh(norm))*h2/norm if norm > 0 else 10*h2
+            return 1.0*(torch.tanh(norm))*h2/norm if norm > 0 else 1*h2
         
         else:
             # critic network simply outputs a number
@@ -113,48 +80,8 @@ class Network(nn.Module):
             h00 = self.nonlin(self.fc0(x2))
             x = torch.cat((out,h00), dim=1)
             # Linear
-            h1 = self.nonlin(self.fc1(x))
-            # h2 = self.nonlin(self.fc2(h1)) #not used in test 24
-            
-            # #old configuration
-            # h3 = (self.fc3(h2))
-            # return h3
-        
-            # #new configuration
-            # h3 = self.nonlin_tanh(self.fc3(h2))
-            # h4 = self.nonlin(self.fc4(h2))
-            # return torch.cat((h3,h4), dim=1)
-            
-            #New configuration used in test 24
-            h3 = (self.fc3(h1))
-            return h3
+            h1 = self.nonlin(self.fc1(x))       
+            h2 = (self.fc2(h1))
+            return h2
 
 
-
-# from tensorboardX import SummaryWriter
-# logger = SummaryWriter(log_dir='test')
-# logger.add_graph(Network)
-
-# num_landmarks = 1
-# num_agents = 1
-# in_actor = num_landmarks*2 + (num_agents-1)*2 + 2+2 + num_landmarks + 2 #x-y of landmarks + x-y of others + x-y and x-y velocity of current agent + range to landmarks + 2 actions
-# hidden_in_actor = in_actor*15
-# hidden_out_actor = int(hidden_in_actor/2)
-# out_actor = 2 #each agent have 2 continuous actions on x-y plane
-# in_critic = in_actor * num_agents # the critic input is all agents concatenated
-# hidden_in_critic = in_critic * 15 + out_actor * num_agents
-# hidden_out_critic = int(hidden_in_critic/2)
-# #RNN
-# rnn_num_layers = 2 #two stacked RNN to improve the performance (default = 1)
-# rnn_hidden_size_actor = hidden_in_actor
-# rnn_hidden_size_critic = hidden_in_critic - out_actor * num_agents
-        
-# import hiddenlayer as hl
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # PyTorch v0.4.0
-# model = Network(in_actor, hidden_in_actor, hidden_out_actor, out_actor, rnn_num_layers, rnn_hidden_size_actor, device,actor=True)
-# hl.build_graph(model,torch.zeros([1,2,3,4]))
-
-
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # PyTorch v0.4.0
-# model = Network(in_actor, hidden_in_actor, hidden_out_actor, out_actor, rnn_num_layers, rnn_hidden_size_actor, device,actor=True).to(device)
-# summary(model, (1, 28, 28))

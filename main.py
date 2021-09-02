@@ -37,7 +37,7 @@ RENDER = False #in BSC machines the render doesn't work
 PROGRESS_BAR = True #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
 # DEVICE = 'cpu'
-HISTORY_LENGTH = 10
+HISTORY_LENGTH = 5
 
 
 
@@ -158,8 +158,10 @@ def main():
         # trained_checkpoint = r'E:\Ivan\UPC\UDACITY\DRL_Nanodegree\Part4\MADDPG\032821_102717\model_dir\episode-99000.pt' #test2 6 agents + pretrined from previous
         # trained_checkpoint = r'E:\Ivan\UPC\UDACITY\DRL_Nanodegree\Part4\MADDPG\032921_160324\model_dir\episode-99000.pt' #test3 6 agents pre-pretrined
         # trained_checkpoint = r'E:\Ivan\UPC\UDACITY\DRL_Nanodegree\Part4\MADDPG\033021_203450\model_dir\episode-98004.pt' #test3 6 agents pre-pre-pretrined
-        trained_checkpoint = r'E:\Ivan\UPC\UDACITY\DRL_Nanodegree\Part4\MADDPG\040921_222255\model_dir\episode-299994.pt' #Test with slighly reward function modified 300.000 iteration
-    
+        # trained_checkpoint = r'E:\Ivan\UPC\UDACITY\DRL_Nanodegree\Part4\MADDPG\040921_222255\model_dir\episode-299994.pt' #Test with slighly reward function modified 300.000 iteration
+        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090121_151545\model_dir\episode-350000.pt' #first test with LS with one agent and one landmark (episode_length=35) This works better, it has learned to stay close to the landmark and make small movements to maintain the error.
+        
+        
         aux = torch.load(trained_checkpoint)
         for i in range(num_agents):  
             # load the weights from file
