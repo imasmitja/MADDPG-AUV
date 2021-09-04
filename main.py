@@ -16,25 +16,25 @@ import copy
 # for saving gif
 import imageio
 
-BUFFER_SIZE =   4000 #int(1e6) # Replay buffer size
-BATCH_SIZE  =   32 #512      # Mini batch size
-GAMMA       =   0.9 #0.95     # Discount factor
+BUFFER_SIZE =   4000     # int(1e6) # Replay buffer size
+BATCH_SIZE  =   32       # 512      # Mini batch size
+GAMMA       =   0.95      # 0.95     # Discount factor
 TAU         =   0.01     # For soft update of target parameters 
 LR_ACTOR    =   1e-3     # Learning rate of the actor
 LR_CRITIC   =   1e-3     # Learning rate of the critic
-WEIGHT_DECAY =  0#1e-5     # L2 weight decay
-UPDATE_EVERY =  30        # How many steps to take before updating target networks
+WEIGHT_DECAY =  0        # 1e-5     # L2 weight decay
+UPDATE_EVERY =  30       # How many steps to take before updating target networks
 UPDATE_TIMES =  20       # Number of times we update the networks
 SEED = 3                 # Seed for random numbers
 BENCHMARK   =   False
-EXP_REP_BUF =   False     # Experienced replay buffer activation
+EXP_REP_BUF =   False    # Experienced replay buffer activation
 PRE_TRAINED =   False    # Use a previouse trained network as imput weights
 #Scenario used to train the networks
 # SCENARIO    =   "simple_spread_ivan" 
 SCENARIO    =   "simple_track_ivan"
 # SCENARIO    =   "dynamic_track_ivan"  
-RENDER = False #in BSC machines the render doesn't work
-PROGRESS_BAR = True #if we want to render the progress bar
+RENDER = False          #in BSC machines the render doesn't work
+PROGRESS_BAR = True     #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
 # DEVICE = 'cpu'
 HISTORY_LENGTH = 5
@@ -210,14 +210,12 @@ def main():
         save_info = ((episode) % save_interval < parallel_envs or episode==number_of_episodes-parallel_envs)
         frames = []
         tmax = 0
-        next_history = copy.deepcopy(history)
-        
+        next_history = copy.deepcopy(history)       
         
         if save_info == True and RENDER == True:
             frames.append(env.render('rgb_array'))
 
-        for episode_t in range(episode_length):
-            
+        for episode_t in range(episode_length):           
             # get actions
             # explore = only explore for a certain number of episodes
             # action input needs to be transposed
@@ -225,8 +223,7 @@ def main():
             his = []
             for i in range(num_agents):
                 his.append(torch.cat((transpose_to_tensor(history)[i],transpose_to_tensor(history_a)[i]), dim=2))
-            
-            
+                      
             actions = maddpg.act(his,transpose_to_tensor(obs) , noise=noise) 
         
             actions_array = torch.stack(actions).detach().numpy()
@@ -235,8 +232,7 @@ def main():
             # flip the first two indices
             # input to step requires the first index to correspond to number of parallel agents
             actions_for_env = np.rollaxis(actions_array,1)
-            
-            
+                    
             # environment step
             # step forward one frame
             # next_obs, next_obs_full, rewards, dones, info = env.step(actions_for_env)
@@ -286,6 +282,7 @@ def main():
             
             # finish the episode if done
             if dones.any():
+                # print('Number of episodes = ', episode_t)
                 break
             
         #Reduce the quantity of noise added to the action

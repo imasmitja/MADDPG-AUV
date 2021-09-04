@@ -48,6 +48,8 @@ def make_env(scenario_name, num_agents=3, num_landmarks=3, benchmark=False):
     if benchmark:
         env = MultiAgentEnv(world, scenario.reset_world, scenario.reward, scenario.observation,
                             info_callback=scenario.benchmark_data)
+        # env = MultiAgentEnv(world, scenario.reset_world, scenario.reward, scenario.observation,
+        #                     info_callback=scenario.benchmark_data, done_callback = scenario.done)
     else:
         env = MultiAgentEnv(world, scenario.reset_world, scenario.reward, scenario.observation, done_callback = scenario.done)
 
