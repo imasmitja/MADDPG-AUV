@@ -36,10 +36,10 @@ class Network(nn.Module):
         self.nonlin = f.relu #leaky_relu
         self.nonlin_tanh = torch.tanh #tanh
         self.actor = actor
-        #self.reset_parameters()
+        self.reset_parameters()
 
     def reset_parameters(self):
-        self.rnn.weight.data.uniform_(*hidden_init(self.rnn))
+        # self.rnn.weight.data.uniform_(*hidden_init(self.rnn))
         self.fc0.weight.data.uniform_(*hidden_init(self.fc0))
         self.fc1.weight.data.uniform_(*hidden_init(self.fc1))
         self.fc2.weight.data.uniform_(*hidden_init(self.fc2))

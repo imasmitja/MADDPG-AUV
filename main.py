@@ -4,6 +4,7 @@
 import envs
 from buffer import ReplayBuffer, ReplayBuffer_SummTree
 from maddpg import MADDPG
+from matd3_bc import MATD3_BC
 import torch
 import numpy as np
 from tensorboardX import SummaryWriter
@@ -38,6 +39,8 @@ PROGRESS_BAR = True     #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
 # DEVICE = 'cpu'
 HISTORY_LENGTH = 5
+# DNN = 'MADDPG'
+DNN = 'MATD3_BC'
 
 
 
@@ -114,6 +117,7 @@ def main():
     print('save_interval        =  ',save_interval)
     print('noise                =  ',noise)
     print('noise_reduction      =  ',noise_reduction)
+    print('DNN architecture     =  ',DNN)
     print('Folder name          =  ',common_folder)
     
     
@@ -137,7 +141,12 @@ def main():
     
     # initialize policy and critic
     print('Initialize the Actor-Critic networks')
-    maddpg = MADDPG(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE)
+    if DNN == 'MADDPG':
+            maddpg = MADDPG(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE)
+    elif DNN == 'MATD3_BC':
+            maddpg = MATD3_BC(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE)
+    else:
+        print('ERROR UNKNOWN DNN ARCHITECTURE')
     logger = SummaryWriter(log_dir=log_path)
     
     agents_reward = []
@@ -165,8 +174,14 @@ def main():
         aux = torch.load(trained_checkpoint)
         for i in range(num_agents):  
             # load the weights from file
-            maddpg.maddpg_agent[i].actor.load_state_dict(aux[i]['actor_params'])
-            maddpg.maddpg_agent[i].critic.load_state_dict(aux[i]['critic_params'])
+            if DNN == 'MADDPG':
+                maddpg.maddpg_agent[i].actor.load_state_dict(aux[i]['actor_params'])
+                maddpg.maddpg_agent[i].critic.load_state_dict(aux[i]['critic_params'])
+            elif DNN == 'MATD3_BC':
+                maddpg.matd3_bc_agent[i].actor.load_state_dict(aux[i]['actor_params'])
+                maddpg.matd3_bc_agent[i].critic.load_state_dict(aux[i]['critic_params'])
+            else:
+                break
     
     print('Starting iterations... \r\n')
     #show progress bar
@@ -185,7 +200,12 @@ def main():
         all_obs = env.reset() #[parallel_env, num_agents, observation_state_size], ex: [8,1,6]
         #Reset the noise
         for i in range(num_agents):
-            maddpg.maddpg_agent[i].noise.reset()
+            if DNN == 'MADDPG':
+                maddpg.maddpg_agent[i].noise.reset()
+            elif DNN == 'MATD3_BC':
+                maddpg.matd3_bc_agent[i].noise.reset()
+            else:
+                break
         #Reset the rewards
         reward_this_episode = np.zeros((parallel_envs, num_agents))  
         
@@ -330,11 +350,20 @@ def main():
         if save_info:
             
             for i in range(num_agents):
-
-                save_dict = {'actor_params' : maddpg.maddpg_agent[i].actor.state_dict(),
+                
+                if DNN == 'MADDPG':
+                    save_dict = {'actor_params' : maddpg.maddpg_agent[i].actor.state_dict(),
                              'actor_optim_params': maddpg.maddpg_agent[i].actor_optimizer.state_dict(),
                              'critic_params' : maddpg.maddpg_agent[i].critic.state_dict(),
                              'critic_optim_params' : maddpg.maddpg_agent[i].critic_optimizer.state_dict()}
+                elif DNN == 'MATD3_BC':
+                    save_dict = {'actor_params' : maddpg.matd3_bc_agent[i].actor.state_dict(),
+                             'actor_optim_params': maddpg.matd3_bc_agent[i].actor_optimizer.state_dict(),
+                             'critic_params' : maddpg.matd3_bc_agent[i].critic.state_dict(),
+                             'critic_optim_params' : maddpg.matd3_bc_agent[i].critic_optimizer.state_dict()}
+                else:
+                    break
+            
                 save_dict_list.append(save_dict)
 
                 torch.save(save_dict_list, 

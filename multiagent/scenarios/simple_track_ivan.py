@@ -130,7 +130,7 @@ class Scenario(BaseScenario):
         inc_action = agent.state.p_vel_old - agent.state.p_vel
         rew -= 0.01*np.sqrt(inc_action[0]**2+inc_action[1]**2)
         if np.all(agent.state.p_vel_old == agent.state.p_vel) == False:
-            rew -= 1.
+            rew -= 0.01
         agent.state.p_vel_old = agent.state.p_vel + 0.
         
             
