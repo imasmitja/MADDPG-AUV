@@ -17,12 +17,12 @@ import copy
 # for saving gif
 import imageio
 
-BUFFER_SIZE =   4000     # int(1e6) # Replay buffer size
-BATCH_SIZE  =   32       # 512      # Mini batch size
-GAMMA       =   0.95      # 0.95     # Discount factor
+BUFFER_SIZE =   500000     # int(1e6) # Replay buffer size
+BATCH_SIZE  =   128       # 512      # Mini batch size
+GAMMA       =   0.99      # 0.95     # Discount factor
 TAU         =   0.01     # For soft update of target parameters 
 LR_ACTOR    =   1e-3     # Learning rate of the actor
-LR_CRITIC   =   1e-3     # Learning rate of the critic
+LR_CRITIC   =   1e-4     # Learning rate of the critic
 WEIGHT_DECAY =  0        # 1e-5     # L2 weight decay
 UPDATE_EVERY =  30       # How many steps to take before updating target networks
 UPDATE_TIMES =  20       # Number of times we update the networks
@@ -70,7 +70,7 @@ def main():
     num_landmarks = 1
     # number of training episodes.
     # change this to higher number to experiment. say 30000.
-    number_of_episodes = 800000
+    number_of_episodes = 1600000
     episode_length = 200
     # how many episodes to save policy and gif
     save_interval = 50000

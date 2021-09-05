@@ -31,7 +31,7 @@ LR_CRITIC   =   1e-3     # Learning rate of the critic
 WEIGHT_DECAY =  0 #1e-5     # L2 weight decay
 UPDATE_EVERY =  30       # How many steps to take before updating target networks
 UPDATE_TIMES =  20       # Number of times we update the networks
-SEED = 198   #198                # Seed for random numbers
+SEED = 199988   #198                # Seed for random numbers
 BENCHMARK   =   True
 EXP_REP_BUF =   False     # Experienced replay buffer activation
 PRE_TRAINED =   True    # Use a previouse trained network as imput weights
@@ -82,7 +82,8 @@ def main():
         
         #New tests with LS simple_track_ivan.py using the new network, which is simplified and parametres based on IEEEAccess paper as well as their rewards functions (more or less)
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090121_151545\model_dir\episode-350000.pt' #first test with LS with one agent and one landmark (episode_length=35) This works better, it has learned to stay close to the landmark and make small movements to maintain the error.
-        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090321_092533\model_dir\episode-799992.pt' #Test 40. first test with LS with one agent and one landmark (episode_length=35) This works better.
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090321_092533\model_dir\episode-799992.pt' #Test 40. first test with LS with one agent and one landmark (episode_length=35) This works better.
+        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090421_143431\model_dir\episode-700000.pt' #Test 44. 
 
         
         aux = torch.load(trained_checkpoint)
