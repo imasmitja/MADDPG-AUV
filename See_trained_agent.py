@@ -10,6 +10,7 @@ In the next code cell, you will load the trained weights from file to watch a sm
 import envs
 from buffer import ReplayBuffer, ReplayBuffer_SummTree
 from maddpg import MADDPG
+from matd3_bc import MATD3_BC
 import torch
 import numpy as np
 from tensorboardX import SummaryWriter
@@ -24,14 +25,14 @@ import imageio
 
 BUFFER_SIZE =   4000 # int(1e6) # Replay buffer size
 BATCH_SIZE  =   32 #512      # Mini batch size
-GAMMA       =   0.9 #0.95     # Discount factor
+GAMMA       =   0.99 #0.95     # Discount factor
 TAU         =   0.01     # For soft update of target parameters 
 LR_ACTOR    =   1e-3     # Learning rate of the actor
 LR_CRITIC   =   1e-3     # Learning rate of the critic
 WEIGHT_DECAY =  0 #1e-5     # L2 weight decay
 UPDATE_EVERY =  30       # How many steps to take before updating target networks
 UPDATE_TIMES =  20       # Number of times we update the networks
-SEED = 199988   #198                # Seed for random numbers
+SEED = 1118   #198                # Seed for random numbers
 BENCHMARK   =   True
 EXP_REP_BUF =   False     # Experienced replay buffer activation
 PRE_TRAINED =   True    # Use a previouse trained network as imput weights
@@ -42,6 +43,8 @@ RENDER = True #in BSC machines the render doesn't work
 PROGRESS_BAR = True #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
 HISTORY_LENGTH = 5
+# DNN = 'MADDPG'
+DNN = 'MATD3_BC'
 
 def seeding(seed=1):
     np.random.seed(seed)
@@ -61,7 +64,12 @@ def main():
     env = envs.make_parallel_env(parallel_envs, SCENARIO, seed = SEED, num_agents=num_agents, num_landmarks=num_landmarks, benchmark = BENCHMARK)
        
     # initialize policy and critic
-    maddpg = MADDPG(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE)
+    if DNN == 'MADDPG':
+            maddpg = MADDPG(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE)
+    elif DNN == 'MATD3_BC':
+            maddpg = MATD3_BC(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE)
+    else:
+        print('ERROR UNKNOWN DNN ARCHITECTURE')
     agents_reward = []
     for n in range(num_agents):
         agents_reward.append([])
@@ -83,14 +91,23 @@ def main():
         #New tests with LS simple_track_ivan.py using the new network, which is simplified and parametres based on IEEEAccess paper as well as their rewards functions (more or less)
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090121_151545\model_dir\episode-350000.pt' #first test with LS with one agent and one landmark (episode_length=35) This works better, it has learned to stay close to the landmark and make small movements to maintain the error.
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090321_092533\model_dir\episode-799992.pt' #Test 40. first test with LS with one agent and one landmark (episode_length=35) This works better.
-        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090421_143431\model_dir\episode-700000.pt' #Test 44. 
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090421_143431\model_dir\episode-700000.pt' #Test 44. 
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090521_093138\model_dir\episode-1200000.pt' #Test 47.
+        
+        # with TD3_BC architecture
+        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090421_203320\model_dir\episode-799992.pt' #Test 47.
 
         
         aux = torch.load(trained_checkpoint)
         for i in range(num_agents):  
-            # load the weights from file
-            maddpg.maddpg_agent[i].actor.load_state_dict(aux[i]['actor_params'])
-            maddpg.maddpg_agent[i].critic.load_state_dict(aux[i]['critic_params'])
+            if DNN == 'MADDPG':
+                maddpg.maddpg_agent[i].actor.load_state_dict(aux[i]['actor_params'])
+                maddpg.maddpg_agent[i].critic.load_state_dict(aux[i]['critic_params'])
+            elif DNN == 'MATD3_BC':
+                maddpg.matd3_bc_agent[i].actor.load_state_dict(aux[i]['actor_params'])
+                maddpg.matd3_bc_agent[i].critic.load_state_dict(aux[i]['critic_params'])
+            else:
+                break
     
     #Reset the environment
     all_obs = env.reset() 
