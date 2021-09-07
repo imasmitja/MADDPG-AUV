@@ -114,7 +114,7 @@ class Scenario(BaseScenario):
                 world.error[i] = np.sqrt((l.pfxs[0]-world.landmarks[i].state.p_pos[0])**2+(l.pfxs[2]-world.landmarks[i].state.p_pos[1])**2) #Error from PF
             else:
                 world.error[i] = np.sqrt((l.lsxs[-1][0]-world.landmarks[i].state.p_pos[0])**2+(l.lsxs[-1][2]-world.landmarks[i].state.p_pos[1])**2) #Error from LS
-            rew -= 10.*(0.01-world.error[i])
+            rew -= 100.*(0.01-world.error[i])
         
         dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks[:-world.num_landmarks]]
         
@@ -130,7 +130,7 @@ class Scenario(BaseScenario):
         inc_action = agent.state.p_vel_old - agent.state.p_vel
         rew -= 0.01*np.sqrt(inc_action[0]**2+inc_action[1]**2)
         if np.all(np.sign(agent.state.p_vel_old) == np.sign(agent.state.p_vel)) == True:
-            rew = 1.
+            rew = 0.01
         agent.state.p_vel_old = agent.state.p_vel + 0.
         
             

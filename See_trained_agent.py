@@ -32,7 +32,7 @@ LR_CRITIC   =   1e-3     # Learning rate of the critic
 WEIGHT_DECAY =  0 #1e-5     # L2 weight decay
 UPDATE_EVERY =  30       # How many steps to take before updating target networks
 UPDATE_TIMES =  20       # Number of times we update the networks
-SEED = 1118   #198                # Seed for random numbers
+SEED = 8   #198                # Seed for random numbers
 BENCHMARK   =   True
 EXP_REP_BUF =   False     # Experienced replay buffer activation
 PRE_TRAINED =   True    # Use a previouse trained network as imput weights
@@ -95,7 +95,8 @@ def main():
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090521_093138\model_dir\episode-1200000.pt' #Test 47.
         
         # with TD3_BC architecture
-        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090421_203320\model_dir\episode-799992.pt' #Test 47.
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090421_203320\model_dir\episode-799992.pt' #Test 47.
+        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090521_222146\model_dir\episode-600000.pt' #Test 48.
 
         
         aux = torch.load(trained_checkpoint)

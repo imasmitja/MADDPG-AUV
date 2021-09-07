@@ -3,7 +3,7 @@
 
 from networkforall import Network
 from utilities import hard_update, gumbel_softmax, onehot_from_logits
-from torch.optim import Adam
+from torch.optim import Adam, AdamW
 import torch
 import numpy as np
 
@@ -37,6 +37,9 @@ class DDPGAgent():
 
         self.actor_optimizer = Adam(self.actor.parameters(), lr=lr_actor)
         self.critic_optimizer = Adam(self.critic.parameters(), lr=lr_critic, weight_decay=weight_decay)
+        # self.actor_optimizer = AdamW(self.actor.parameters(), lr=lr_actor, betas=(0.9, 0.999), eps=1e-08, weight_decay=weight_decay, amsgrad=False)
+        # self.critic_optimizer = AdamW(self.critic.parameters(), lr=lr_critic, betas=(0.9, 0.999), eps=1e-08, weight_decay=weight_decay, amsgrad=False)
+
 
 
     def act(self, his, obs, noise=0.0):
