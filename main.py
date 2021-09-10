@@ -17,9 +17,9 @@ import copy
 # for saving gif
 import imageio
 
-BUFFER_SIZE =   500000     # int(1e6) # Replay buffer size
-BATCH_SIZE  =   128       # 512      # Mini batch size
-GAMMA       =   0.99      # 0.95     # Discount factor
+BUFFER_SIZE =   500000   # int(1e6) # Replay buffer size
+BATCH_SIZE  =   128      # 512      # Mini batch size
+GAMMA       =   0.99     # 0.95     # Discount factor
 TAU         =   0.01     # For soft update of target parameters 
 LR_ACTOR    =   1e-3     # Learning rate of the actor
 LR_CRITIC   =   1e-4     # Learning rate of the critic
@@ -30,6 +30,7 @@ SEED = 3                 # Seed for random numbers
 BENCHMARK   =   False
 EXP_REP_BUF =   False    # Experienced replay buffer activation
 PRE_TRAINED =   False    # Use a previouse trained network as imput weights
+PRE_TRAINED_EP = 100000
 #Scenario used to train the networks
 # SCENARIO    =   "simple_spread_ivan" 
 SCENARIO    =   "simple_track_ivan"
@@ -168,7 +169,8 @@ def main():
         # trained_checkpoint = r'E:\Ivan\UPC\UDACITY\DRL_Nanodegree\Part4\MADDPG\032921_160324\model_dir\episode-99000.pt' #test3 6 agents pre-pretrined
         # trained_checkpoint = r'E:\Ivan\UPC\UDACITY\DRL_Nanodegree\Part4\MADDPG\033021_203450\model_dir\episode-98004.pt' #test3 6 agents pre-pre-pretrined
         # trained_checkpoint = r'E:\Ivan\UPC\UDACITY\DRL_Nanodegree\Part4\MADDPG\040921_222255\model_dir\episode-299994.pt' #Test with slighly reward function modified 300.000 iteration
-        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090121_151545\model_dir\episode-350000.pt' #first test with LS with one agent and one landmark (episode_length=35) This works better, it has learned to stay close to the landmark and make small movements to maintain the error.
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090121_151545\model_dir\episode-350000.pt' #first test with LS with one agent and one landmark (episode_length=35) This works better, it has learned to stay close to the landmark and make small movements to maintain the error.
+        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090721_075950\model_dir\episode-100000.pt' # Test 52
         
         
         aux = torch.load(trained_checkpoint)
@@ -191,6 +193,9 @@ def main():
         timer_bar = tqdm.tqdm(range(number_of_episodes),desc='\r\n Episode',position=0)
         
     for episode in range(0, number_of_episodes, parallel_envs):
+        
+        if PRE_TRAINED == True:
+            episode += PRE_TRAINED_EP
 
         if PROGRESS_BAR == True:
             #timer.update(episode)
@@ -307,6 +312,8 @@ def main():
             
         #Reduce the quantity of noise added to the action
         noise *= noise_reduction
+        if PRE_TRAINED == True and episode == PRE_TRAINED_EP:
+            noise *= noise_reduction**PRE_TRAINED_EP
                 
         # update once after every episode_per_update 
         # if len(buffer) > BATCH_SIZE and episode % episode_per_update < parallel_envs:

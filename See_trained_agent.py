@@ -15,7 +15,7 @@ import torch
 import numpy as np
 from tensorboardX import SummaryWriter
 import os
-from utilities import transpose_list, transpose_to_tensor, circle_path
+from utilities import transpose_list, transpose_to_tensor, circle_path, random_levy
 import time
 import copy
 import matplotlib.pyplot as plt
@@ -32,7 +32,7 @@ LR_CRITIC   =   1e-3     # Learning rate of the critic
 WEIGHT_DECAY =  0 #1e-5     # L2 weight decay
 UPDATE_EVERY =  30       # How many steps to take before updating target networks
 UPDATE_TIMES =  20       # Number of times we update the networks
-SEED = 8   #198                # Seed for random numbers
+SEED = 89018   #198                # Seed for random numbers
 BENCHMARK   =   True
 EXP_REP_BUF =   False     # Experienced replay buffer activation
 PRE_TRAINED =   True    # Use a previouse trained network as imput weights
@@ -95,9 +95,14 @@ def main():
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090521_093138\model_dir\episode-1200000.pt' #Test 47.
         
         # with TD3_BC architecture
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090421_203320\model_dir\episode-799992.pt' #Test 47.
-        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090521_222146\model_dir\episode-600000.pt' #Test 48.
+        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090421_203320\model_dir\episode-799992.pt' #Test 45.
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090521_222146\model_dir\episode-600000.pt' #Test 49.
+        
 
+        # New reward:
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090821_205550\model_dir\episode-1599992.pt' #Test 51. MATD3_BC
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090821_205550\model_dir\episode-850000.pt' #Test 51. MATD3_BC
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090721_075950\model_dir\episode-50000.pt' #Test 52, MADDPG.
         
         aux = torch.load(trained_checkpoint)
         for i in range(num_agents):  
@@ -182,6 +187,8 @@ def main():
         
         #see a random agent
         # actions_for_env = np.array([[np.random.rand(2)*2-1]])
+        beta = 1.99 #must be between 1 and 2
+        # actions_for_env = random_levy(beta)
         
         # send all actions to the environment
         next_obs, rewards, dones, info = env.step(actions_for_env)
@@ -238,12 +245,20 @@ def main():
     plt.plot(agent_x,agent_y,'bo--',alpha=0.5,label='Agent')
     plt.plot(landmark_p_x,landmark_p_y,'rs--',alpha=0.5,label='Landmark Predicted')
     plt.plot(landmark_x,landmark_y,'k^--',alpha=0.5,label='Landmark Real')
-    
     plt.xlabel('X position')
     plt.ylabel('Y position')
     plt.title('Trained agent (RL)')
     # plt.title('Predefined cricumference')
     plt.legend()
+    plt.show()
+    
+    target_error = np.sqrt((np.array(landmark_p_x)-np.array(landmark_x))**2+(np.array(landmark_p_y)-np.array(landmark_y))**2)
+    plt.figure(figsize=(5,5))
+    plt.plot(steps,target_error,'bo-')
+    plt.ylabel('Target prediction error (RMSE)')
+    plt.xlabel('Steps')
+    plt.title('Trained agent (RL)')
+    # plt.title('Predefined cricumference')
     plt.show()
     
     plt.figure(figsize=(5,5))

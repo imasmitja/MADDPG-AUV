@@ -4,6 +4,7 @@ import torch.nn.functional as F
 import torch.distributed as dist
 from torch.autograd import Variable
 import numpy as np
+import math
 
 def transpose_list(mylist):
     return list(map(list, zip(*mylist)))
@@ -125,6 +126,19 @@ def circle_path(obs_all,radius):
             except:
                 actions = np.array([[[np.cos(angle),np.sin(angle)]]])
     return actions
+
+
+def random_levy(beta):
+    # beta = 1. #must be between 1 and 2
+    direction = np.random.uniform(0,2*np.pi)
+    sigma = ((math.gamma(1+beta)*np.sin(np.pi*beta/2))/(math.gamma((1+beta)/2)*beta*2**((beta-1)/2)))**(1/beta)
+    u = np.random.normal(0.,sigma)
+    v = np.random.normal(0.,1.)
+    step_length = u / abs(v)**(1/beta)
+    return np.array([[[np.cos(direction)*step_length, np.sin(direction)*step_length]]])
+    
+    
+
 
 """def main():
     torch.Tensor()
