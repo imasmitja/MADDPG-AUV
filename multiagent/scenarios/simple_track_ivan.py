@@ -126,11 +126,25 @@ class Scenario(BaseScenario):
             rew -= 100
         if min(dists) < 0.1: #is collision
             rew -= 10
-        #reward based on increment of action (from paper ieeeAccess) done in test 25
-        inc_action = agent.state.p_vel_old - agent.state.p_vel
-        rew -= 0.01*np.sqrt(inc_action[0]**2+inc_action[1]**2)
-        if np.all(np.sign(agent.state.p_vel_old) == np.sign(agent.state.p_vel)) == True:
-            rew = 0.01
+        #reward based on increment of action (from paper ieeeAccess) done in test 25      
+        
+        #compute the angle between the old direction and the new direction  
+        inner = np.inner(agent.state.p_vel_old, agent.state.p_vel)
+        norms = np.linalg.norm(agent.state.p_vel_old) * np.linalg.norm(agent.state.p_vel)
+        if norms == 0.:
+            cos = 1
+        else:
+            cos = inner / norms
+        rad = np.arccos(np.clip(cos, -1.0, 1.0))   
+        rew -= 0.01*rad
+        
+        #old methods
+        # inc_action = agent.state.p_vel_old - agent.state.p_vel
+        # rew -= 0.01*np.sqrt(inc_action[0]**2+inc_action[1]**2)
+        # if np.all(np.sign(agent.state.p_vel_old) == np.sign(agent.state.p_vel)) == True:
+        #     rew = 0.01
+            
+            
         agent.state.p_vel_old = agent.state.p_vel + 0.
         
             
