@@ -29,8 +29,8 @@ UPDATE_TIMES =  20       # Number of times we update the networks
 SEED = 3                 # Seed for random numbers
 BENCHMARK   =   False
 EXP_REP_BUF =   False    # Experienced replay buffer activation
-PRE_TRAINED =   False    # Use a previouse trained network as imput weights
-PRE_TRAINED_EP = 100000
+PRE_TRAINED =   True    # Use a previouse trained network as imput weights
+PRE_TRAINED_EP = 1300000
 #Scenario used to train the networks
 # SCENARIO    =   "simple_spread_ivan" 
 SCENARIO    =   "simple_track_ivan"
@@ -40,8 +40,8 @@ PROGRESS_BAR = True     #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
 # DEVICE = 'cpu'
 HISTORY_LENGTH = 5
-# DNN = 'MADDPG'
-DNN = 'MATD3_BC'
+DNN = 'MADDPG'
+# DNN = 'MATD3_BC'
 
 
 
@@ -170,7 +170,9 @@ def main():
         # trained_checkpoint = r'E:\Ivan\UPC\UDACITY\DRL_Nanodegree\Part4\MADDPG\033021_203450\model_dir\episode-98004.pt' #test3 6 agents pre-pre-pretrined
         # trained_checkpoint = r'E:\Ivan\UPC\UDACITY\DRL_Nanodegree\Part4\MADDPG\040921_222255\model_dir\episode-299994.pt' #Test with slighly reward function modified 300.000 iteration
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090121_151545\model_dir\episode-350000.pt' #first test with LS with one agent and one landmark (episode_length=35) This works better, it has learned to stay close to the landmark and make small movements to maintain the error.
-        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090721_075950\model_dir\episode-100000.pt' # Test 52
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090721_075950\model_dir\episode-100000.pt' # Test 52
+        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091021_070417\model_dir\episode-1300000.pt' # Test 55
+        
         
         
         aux = torch.load(trained_checkpoint)

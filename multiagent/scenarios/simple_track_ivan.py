@@ -114,14 +114,14 @@ class Scenario(BaseScenario):
                 world.error[i] = np.sqrt((l.pfxs[0]-world.landmarks[i].state.p_pos[0])**2+(l.pfxs[2]-world.landmarks[i].state.p_pos[1])**2) #Error from PF
             else:
                 world.error[i] = np.sqrt((l.lsxs[-1][0]-world.landmarks[i].state.p_pos[0])**2+(l.lsxs[-1][2]-world.landmarks[i].state.p_pos[1])**2) #Error from LS
-            rew += 100.*(0.01-world.error[i])
+            rew += 10.*(0.01-world.error[i])
         
         dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks[:-world.num_landmarks]]
         
         #For Test 11
-        # for dist in dists:
+        for dist in dists:
             # rew += 10*np.exp(-1/2*(dist-0.1)**2/0.1)-5
-            # rew += 1*(0.5-dist)
+            rew += 1*(0.5-dist)
         if min(dists) > 1.5: #agent outside the world
             rew -= 100
         if min(dists) < 0.1: #is collision
@@ -136,7 +136,7 @@ class Scenario(BaseScenario):
         else:
             cos = inner / norms
         rad = np.arccos(np.clip(cos, -1.0, 1.0))   
-        rew -= 0.01*rad
+        rew -= 0.0001*abs(rad)
         
         #old methods
         # inc_action = agent.state.p_vel_old - agent.state.p_vel

@@ -32,7 +32,7 @@ LR_CRITIC   =   1e-3     # Learning rate of the critic
 WEIGHT_DECAY =  0 #1e-5     # L2 weight decay
 UPDATE_EVERY =  30       # How many steps to take before updating target networks
 UPDATE_TIMES =  20       # Number of times we update the networks
-SEED = 89018   #198                # Seed for random numbers
+SEED = 8999018   #198                # Seed for random numbers
 BENCHMARK   =   True
 EXP_REP_BUF =   False     # Experienced replay buffer activation
 PRE_TRAINED =   True    # Use a previouse trained network as imput weights
@@ -43,8 +43,8 @@ RENDER = True #in BSC machines the render doesn't work
 PROGRESS_BAR = True #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
 HISTORY_LENGTH = 5
-# DNN = 'MADDPG'
-DNN = 'MATD3_BC'
+DNN = 'MADDPG'
+# DNN = 'MA1TD3_BC'
 
 def seeding(seed=1):
     np.random.seed(seed)
@@ -95,7 +95,7 @@ def main():
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090521_093138\model_dir\episode-1200000.pt' #Test 47.
         
         # with TD3_BC architecture
-        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090421_203320\model_dir\episode-799992.pt' #Test 45.
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090421_203320\model_dir\episode-799992.pt' #Test 45.
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090521_222146\model_dir\episode-600000.pt' #Test 49.
         
 
@@ -103,6 +103,9 @@ def main():
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090821_205550\model_dir\episode-1599992.pt' #Test 51. MATD3_BC
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090821_205550\model_dir\episode-850000.pt' #Test 51. MATD3_BC
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090721_075950\model_dir\episode-50000.pt' #Test 52, MADDPG.
+        
+        # New corrected reward:
+        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091021_070417\model_dir\episode-1300000.pt' #Test 55, MADDPG.
         
         aux = torch.load(trained_checkpoint)
         for i in range(num_agents):  
