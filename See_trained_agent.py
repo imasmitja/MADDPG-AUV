@@ -179,7 +179,7 @@ def main():
         actions_for_env = np.rollaxis(actions_array,1)
         
         #cirlce path using my previous functions
-        # actions_for_env = circle_path(obs,65.) #if this value is bigger, the circle radius is smaller 60 => radi = 200m
+        actions_for_env = circle_path(obs,65.) #if this value is bigger, the circle radius is smaller 60 => radi = 200m
         # print('actions=',actions_for_env)
         
         
