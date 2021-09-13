@@ -29,7 +29,7 @@ UPDATE_TIMES =  20       # Number of times we update the networks
 SEED = 3                 # Seed for random numbers
 BENCHMARK   =   False
 EXP_REP_BUF =   False    # Experienced replay buffer activation
-PRE_TRAINED =   True    # Use a previouse trained network as imput weights
+PRE_TRAINED =   False    # Use a previouse trained network as imput weights
 PRE_TRAINED_EP = 1300000
 #Scenario used to train the networks
 # SCENARIO    =   "simple_spread_ivan" 

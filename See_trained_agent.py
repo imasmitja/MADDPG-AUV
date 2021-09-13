@@ -105,7 +105,10 @@ def main():
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090721_075950\model_dir\episode-50000.pt' #Test 52, MADDPG.
         
         # New corrected reward:
-        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091021_070417\model_dir\episode-1300000.pt' #Test 55, MADDPG.
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091021_070417\model_dir\episode-1300000.pt' #Test 55, MADDPG.
+        
+        # New corrected reward num5:
+        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091221_151432\model_dir\episode-1300000.pt' #Test 57, MADDPG.
         
         aux = torch.load(trained_checkpoint)
         for i in range(num_agents):  
