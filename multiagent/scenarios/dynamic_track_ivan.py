@@ -57,13 +57,11 @@ class Scenario(BaseScenario):
         for agent in world.agents:
             agent.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
             agent.state.p_vel = np.zeros(world.dim_p)
-            agent.state.p_vel_old = np.zeros(world.dim_p-1)
             agent.state.c = np.zeros(world.dim_c)
         for i, landmark in enumerate(world.landmarks):
             if i < world.num_landmarks:
                 landmark.state.p_pos = np.random.uniform(-0.5, +0.5, world.dim_p)
                 landmark.state.p_vel = np.zeros(world.dim_p)
-                landmark.state.p_vel_old = np.zeros(world.dim_p)
                 # landmark.state.p_vel = np.array([0.1,0])
                 # landmark.damping = 0.0
                 # landmark.action.u = np.array([0.0,0.0])
@@ -71,7 +69,6 @@ class Scenario(BaseScenario):
             else:
                 landmark.state.p_pos = world.agents[0].state.p_pos
                 landmark.state.p_vel = np.zeros(world.dim_p)
-                landmark.state.p_vel_old = np.zeros(world.dim_p)
         #Initailize the landmark estimated positions
         world.landmarks_estimated = [Target() for i in range(world.num_landmarks)]
         

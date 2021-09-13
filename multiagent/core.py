@@ -58,7 +58,7 @@ class Landmark(Entity):
         # action
         self.action = Action()
         # physical motor noise amount
-        self.u_noise = 0
+        self.u_noise = None
 
 # properties of agent entities
 class Agent(Entity):
@@ -131,10 +131,13 @@ class World(object):
             agent.action = agent.action_callback(agent, self)
         # gather forces applied to entities
         p_force = [None] * len(self.entities)
+        print('p_force1=',p_force)
         # apply agent physical controls
         p_force = self.apply_action_force(p_force)
+        print('p_force2=',p_force)
         # apply environment forces
         p_force = self.apply_environment_force(p_force)
+        print('p_force3=',p_force)
         # integrate physical state
         self.integrate_state(p_force)
         # update agent state
@@ -148,10 +151,12 @@ class World(object):
             if 'agent' in entity.name:
                 if entity.movable:
                     noise = np.random.randn(*entity.action.u.shape) * entity.u_noise if entity.u_noise else 0.0
+                    print('agent action.u=',entity.action.u)
                     p_force[i] = entity.action.u + noise 
             if 'landmark' in entity.name:
                 if entity.movable:
-                    noise = np.random.randn(1)*0.001
+                    noise = np.random.randn(*entity.action.u.shape) * entity.u_noise if entity.u_noise else 0.0
+                    print('landmark action.u=',entity.action.u)
                     p_force[i] = entity.action.u + noise 
         return p_force
 
@@ -179,8 +184,8 @@ class World(object):
             if 'landmark' in entity.name:
                 #if entity is a landmark (x-y force applyied independently)
                 if (p_force[i] is not None):
-                    print('p_vel=',entity.state.p_vel)
-                    print('p_force=',(p_force[i] / entity.mass) * self.dt)
+                    print('p_vel land=',entity.state.p_vel)
+                    print('p_force land=',(p_force[i] / entity.mass) * self.dt)
                     entity.state.p_vel += (p_force[i] / entity.mass) * self.dt
                 if entity.max_speed is not None:
                     speed = np.sqrt(np.square(entity.state.p_vel[0]) + np.square(entity.state.p_vel[1]))
@@ -194,7 +199,7 @@ class World(object):
                 '''This is the new approach designed by Ivan'''
                 #First position of p_vel is the angular velocity which is used to increase the angle of the agent
                 if (p_force[i] is not None):
-                    print('p_force[i]=',p_force[i])
+                    print('p_force[i] agnet=',p_force[i])
                     entity.state.p_vel[0] = p_force[i] * 0.1 #multiply by 0.1 to set radius limit at 100m minimum (taken into consideration that the p_force are bounded between -1 and 1)
                 self.angle += entity.state.p_vel[0]
                 if self.angle > np.pi*2.:
