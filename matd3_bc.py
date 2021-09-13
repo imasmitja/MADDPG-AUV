@@ -13,10 +13,10 @@ class MATD3_BC:
     def __init__(self, num_agents = 3, num_landmarks = 1, discount_factor=0.95, tau=0.02, lr_actor=1.0e-2, lr_critic=1.0e-2, weight_decay=1.0e-5, device = 'cpu'):
         super(MATD3_BC, self).__init__()
 
-        in_actor = num_agents*2*2 + num_landmarks*2 + (num_agents-1)*2 + num_agents + 2 #all previous tests
+        in_actor = num_agents*2*2 + num_landmarks*2 + (num_agents-1)*2 + num_agents + 1 #all previous tests
         hidden_in_actor = 32
         hidden_out_actor = int(hidden_in_actor/2)
-        out_actor = 2 #each agent have 2 continuous actions on x-y plane
+        out_actor = 1 #each agent have 2 continuous actions on x-y plane
         in_critic = in_actor * num_agents # the critic input is all agents concatenated
         hidden_in_critic = 32
         hidden_out_critic = int(hidden_in_critic/2)

@@ -24,7 +24,7 @@ class Network(nn.Module):
             # self.rnn = nn.RNN(input_size, rnn_hidden_size, rnn_num_layers, batch_first=True)
             # self.rnn = nn.GRU(input_size, rnn_hidden_size, rnn_num_layers, batch_first=True)
             self.rnn = nn.LSTM(input_size, rnn_hidden_size, rnn_num_layers, batch_first=True)
-            self.fc0 = nn.Linear(input_size - 2 ,rnn_hidden_size)
+            self.fc0 = nn.Linear(input_size - 1 ,rnn_hidden_size)
             self.fc1 = nn.Linear(rnn_hidden_size*2,hidden_in_dim)
             self.fc2 = nn.Linear(hidden_in_dim,output_dim)
         else:

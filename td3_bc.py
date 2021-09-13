@@ -26,9 +26,9 @@ class TD3_BCAgent():
         super(TD3_BCAgent, self).__init__()
 
         self.actor = Network(in_actor, hidden_in_actor, hidden_out_actor, out_actor, rnn_num_layers, rnn_hidden_size_actor, device,actor=True).to(device)
-        self.critic = Network(in_critic, hidden_in_critic, hidden_out_critic, 2, rnn_num_layers, rnn_hidden_size_critic, device).to(device)
+        self.critic = Network(in_critic, hidden_in_critic, hidden_out_critic, 1, rnn_num_layers, rnn_hidden_size_critic, device).to(device)
         self.target_actor = Network(in_actor, hidden_in_actor, hidden_out_actor, out_actor, rnn_num_layers, rnn_hidden_size_actor, device, actor=True).to(device)
-        self.target_critic = Network(in_critic, hidden_in_critic, hidden_out_critic, 2, rnn_num_layers, rnn_hidden_size_critic, device).to(device)
+        self.target_critic = Network(in_critic, hidden_in_critic, hidden_out_critic, 1, rnn_num_layers, rnn_hidden_size_critic, device).to(device)
 
         self.noise = OUNoise(out_actor, scale=1.0 )
         self.device = device
