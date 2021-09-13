@@ -37,8 +37,8 @@ BENCHMARK   =   True
 EXP_REP_BUF =   False     # Experienced replay buffer activation
 PRE_TRAINED =   True    # Use a previouse trained network as imput weights
 #Scenario used to train the networks
-SCENARIO    =   "simple_track_ivan" 
-# SCENARIO    =   "dynamic_track_ivan" 
+# SCENARIO    =   "simple_track_ivan" 
+SCENARIO    =   "dynamic_track_ivan" 
 RENDER = True #in BSC machines the render doesn't work
 PROGRESS_BAR = True #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
@@ -139,6 +139,7 @@ def main():
     
     scores = 0                
     t = 0
+    
     #save gif
     frames = []
     gif_folder = ''

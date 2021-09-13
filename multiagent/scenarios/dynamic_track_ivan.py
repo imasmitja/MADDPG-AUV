@@ -2,6 +2,7 @@ import numpy as np
 from multiagent.core import World, Agent, Landmark
 from multiagent.scenario import BaseScenario
 from target_pf import Target
+from utilities import random_levy
 
 PF_METHOD = False
 
@@ -56,18 +57,21 @@ class Scenario(BaseScenario):
         for agent in world.agents:
             agent.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
             agent.state.p_vel = np.zeros(world.dim_p)
+            agent.state.p_vel_old = np.zeros(world.dim_p-1)
             agent.state.c = np.zeros(world.dim_c)
         for i, landmark in enumerate(world.landmarks):
             if i < world.num_landmarks:
                 landmark.state.p_pos = np.random.uniform(-0.5, +0.5, world.dim_p)
                 landmark.state.p_vel = np.zeros(world.dim_p)
+                landmark.state.p_vel_old = np.zeros(world.dim_p)
                 # landmark.state.p_vel = np.array([0.1,0])
-                landmark.damping = 0.0
-                landmark.action.u = np.array([0.0,0.0])
-                landmark.u_noise = 0.001
+                # landmark.damping = 0.0
+                # landmark.action.u = np.array([0.0,0.0])
+                # landmark.u_noise = 0.001
             else:
                 landmark.state.p_pos = world.agents[0].state.p_pos
                 landmark.state.p_vel = np.zeros(world.dim_p)
+                landmark.state.p_vel_old = np.zeros(world.dim_p)
         #Initailize the landmark estimated positions
         world.landmarks_estimated = [Target() for i in range(world.num_landmarks)]
         
@@ -89,7 +93,6 @@ class Scenario(BaseScenario):
                 if self.is_collision(a, agent):
                     rew -= 1
                     collisions += 1
-        
             if l.collide:
                 if self.is_collision(l, agent):
                     rew -= 1
@@ -119,26 +122,32 @@ class Scenario(BaseScenario):
                 world.error[i] = np.sqrt((l.pfxs[0]-world.landmarks[i].state.p_pos[0])**2+(l.pfxs[2]-world.landmarks[i].state.p_pos[1])**2) #Error from PF
             else:
                 world.error[i] = np.sqrt((l.lsxs[-1][0]-world.landmarks[i].state.p_pos[0])**2+(l.lsxs[-1][2]-world.landmarks[i].state.p_pos[1])**2) #Error from LS
-            rew -= world.error[i]*10
+            rew += 10.*(0.01-world.error[i])
         
         dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks[:-world.num_landmarks]]
         
-        #For previous tests
-        # if min(dists) > 1.5: #agent outside the world
-        #     rew -= 10
-        # if min(dists) < 0.05: #is collision
-        #     rew -= 1
-        # if min(dists) > 0.05 and min(dists) < 0.06: #is no collision but closer to target
-        #     rew += 2
-        
-        
         #For Test 11
         for dist in dists:
-            rew += 10*np.exp(-1/2*(dist-0.1)**2/0.1)-9
+            # rew += 10*np.exp(-1/2*(dist-0.1)**2/0.1)-5
+            rew += 1*(0.5-dist)
         if min(dists) > 1.5: #agent outside the world
+            rew -= 100
+        if min(dists) < 0.1: #is collision
             rew -= 10
-        # if min(dists) < 0.05: #is collision
-        #     rew -= 2
+        #reward based on increment of action (from paper ieeeAccess) done in test 25      
+        
+        #compute the angle between the old direction and the new direction  
+        rew -= 0.0001*abs(agent.state.p_vel.item(0))
+        
+        #old methods
+        # inc_action = agent.state.p_vel_old - agent.state.p_vel
+        # rew -= 0.01*np.sqrt(inc_action[0]**2+inc_action[1]**2)
+        # if np.all(np.sign(agent.state.p_vel_old) == np.sign(agent.state.p_vel)) == True:
+        #     rew = 0.01
+            
+            
+        agent.state.p_vel_old = agent.state.p_vel + 0.
+        
             
         if agent.collide:
             for a in world.agents:
@@ -197,8 +206,11 @@ class Scenario(BaseScenario):
                 if entity.movable:
                     #linear movement
                     # entity.action.u = np.array([0.05,0.0])
+                    
                     #random movement
                     entity.action.u = np.random.randn(2)/2.
+                    beta = 1.99 #must be between 1 and 2
+                    entity.action.u = random_levy(beta)
                     if entity.state.p_pos[0] > 0.9:
                         entity.action.u[0] = -abs(entity.action.u[0])
                     if entity.state.p_pos[0] < -0.9:

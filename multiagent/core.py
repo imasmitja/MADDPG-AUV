@@ -176,33 +176,38 @@ class World(object):
             if not entity.movable: continue
             entity.state.p_vel = entity.state.p_vel * (1 - self.damping)
             
+            if 'landmark' in entity.name:
+                #if entity is a landmark (x-y force applyied independently)
+                if (p_force[i] is not None):
+                    print('p_vel=',entity.state.p_vel)
+                    print('p_force=',(p_force[i] / entity.mass) * self.dt)
+                    entity.state.p_vel += (p_force[i] / entity.mass) * self.dt
+                if entity.max_speed is not None:
+                    speed = np.sqrt(np.square(entity.state.p_vel[0]) + np.square(entity.state.p_vel[1]))
+                    if speed > entity.max_speed:
+                        entity.state.p_vel = entity.state.p_vel / np.sqrt(np.square(entity.state.p_vel[0]) +
+                                                                      np.square(entity.state.p_vel[1])) * entity.max_speed
+                entity.state.p_pos += entity.state.p_vel * self.dt
             
-            # if (p_force[i] is not None):
-            #     entity.state.p_vel += (p_force[i] / entity.mass) * self.dt
-            # if entity.max_speed is not None:
-            #     speed = np.sqrt(np.square(entity.state.p_vel[0]) + np.square(entity.state.p_vel[1]))
-            #     if speed > entity.max_speed:
-            #         entity.state.p_vel = entity.state.p_vel / np.sqrt(np.square(entity.state.p_vel[0]) +
-            #                                                       np.square(entity.state.p_vel[1])) * entity.max_speed
-            # entity.state.p_pos += entity.state.p_vel * self.dt
-            
-            # import pdb; pdb.set_trace()
-            '''This is the new approach designed by Ivan'''
-            #First position of p_vel is the angular velocity which is used to increase the angle of the agent
-            if (p_force[i] is not None):
-                entity.state.p_vel[0] = p_force[i] * 0.1 #multiply by 0.1 to set radius limit at 100m minimum (taken into consideration that the p_force are bounded between -1 and 1)
-            self.angle += entity.state.p_vel[0]
-            if self.angle > np.pi*2.:
-                self.angle -= np.pi*2.
-            if self.angle < -np.pi*2:
-                self.angle += np.pi*2
-            #The second position of p_vel is the liniar velocity of the agent
-            # vel = entity.state.p_vel[1]+0.
-            vel = 0.1 #seting this velocity (0.1) and considering that the dt is equal to 0.1, means that we have a new position each 10m.
-            if vel < 0:
-                vel = 0
-            #Finally, we increase the position (aka the agent) using the new angle and velocity.
-            entity.state.p_pos += np.array([vel*np.cos(self.angle),vel*np.sin(self.angle)]) * self.dt
+            if 'agent' in entity.name:
+                #if entity is an agnet (constant velocity, increment of angle)
+                '''This is the new approach designed by Ivan'''
+                #First position of p_vel is the angular velocity which is used to increase the angle of the agent
+                if (p_force[i] is not None):
+                    print('p_force[i]=',p_force[i])
+                    entity.state.p_vel[0] = p_force[i] * 0.1 #multiply by 0.1 to set radius limit at 100m minimum (taken into consideration that the p_force are bounded between -1 and 1)
+                self.angle += entity.state.p_vel[0]
+                if self.angle > np.pi*2.:
+                    self.angle -= np.pi*2.
+                if self.angle < -np.pi*2:
+                    self.angle += np.pi*2
+                #The second position of p_vel is the liniar velocity of the agent
+                # vel = entity.state.p_vel[1]+0.
+                vel = 0.1 #seting this velocity (0.1) and considering that the dt is equal to 0.1, means that we have a new position each 10m.
+                if vel < 0:
+                    vel = 0
+                #Finally, we increase the position (aka the agent) using the new angle and velocity.
+                entity.state.p_pos += np.array([vel*np.cos(self.angle),vel*np.sin(self.angle)]) * self.dt
 
     def update_agent_state(self, agent):
         # set communication state (directly for now)
