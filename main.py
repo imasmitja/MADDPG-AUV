@@ -29,7 +29,7 @@ UPDATE_TIMES =  20       # Number of times we update the networks
 SEED = 3                 # Seed for random numbers
 BENCHMARK   =   False
 EXP_REP_BUF =   False    # Experienced replay buffer activation
-PRE_TRAINED =   True    # Use a previouse trained network as imput weights
+PRE_TRAINED =   False    # Use a previouse trained network as imput weights
 PRE_TRAINED_EP = 1300000
 #Scenario used to train the networks
 # SCENARIO    =   "simple_spread_ivan" 
@@ -231,7 +231,7 @@ def main():
                     aux = obs[n][m].reshape(1,obs_size)*0.
                     history[n][m] = np.concatenate((history[n][m],aux),axis=0)
         #Initialize action history buffer with 0.
-        history_a = np.zeros([parallel_envs,num_agents,HISTORY_LENGTH,2]) #the last entry is the number of actions, here is 2 (x,y)
+        history_a = np.zeros([parallel_envs,num_agents,HISTORY_LENGTH,1]) #the last entry is the number of actions, here is 2 (x,y)
         
         # save info or not
         save_info = ((episode) % save_interval < parallel_envs or episode==number_of_episodes-parallel_envs)
@@ -287,7 +287,7 @@ def main():
                     history[n][m] = np.concatenate((history[n][m],aux),axis=0)
                     history[n][m] = np.delete(history[n][m],0,0)
             # Add actions to the history buffer
-            history_a = np.concatenate((history_a,actions_for_env.reshape(parallel_envs,num_agents,1,2)),axis=2)
+            history_a = np.concatenate((history_a,actions_for_env.reshape(parallel_envs,num_agents,1,1)),axis=2)
             history_a = np.delete(history_a,0,2)
                     
             # obs, obs_full = next_obs, next_obs_full

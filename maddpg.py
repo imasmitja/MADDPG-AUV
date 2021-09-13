@@ -40,11 +40,11 @@ class MADDPG:
         
         #New configuration test 27
         # in_actor = num_landmarks*2 + (num_agents-1)*2 + 2+2 + num_landmarks + 2 #x-y of landmarks + x-y of others + x-y and x-y velocity of current agent + range to landmarks + 2 actions
-        in_actor = num_agents*2*2 + num_landmarks*2 + (num_agents-1)*2 + num_agents + 2 #all previous tests
+        in_actor = num_agents*2*2 + num_landmarks*2 + (num_agents-1)*2 + num_agents + 1 #all previous tests
         # in_actor = num_agents*2*2 + (num_agents-1)*2 + num_agents + 2 #test 40
         hidden_in_actor = 32
         hidden_out_actor = int(hidden_in_actor/2)
-        out_actor = 2 #each agent have 2 continuous actions on x-y plane
+        out_actor = 1 #each agent have 2 continuous actions on x-y plane
         in_critic = in_actor * num_agents # the critic input is all agents concatenated
         hidden_in_critic = 32
         hidden_out_critic = int(hidden_in_critic/2)

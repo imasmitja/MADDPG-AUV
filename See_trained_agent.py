@@ -107,16 +107,16 @@ def main():
         # New corrected reward:
         trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091021_070417\model_dir\episode-1300000.pt' #Test 55, MADDPG.
         
-        aux = torch.load(trained_checkpoint)
-        for i in range(num_agents):  
-            if DNN == 'MADDPG':
-                maddpg.maddpg_agent[i].actor.load_state_dict(aux[i]['actor_params'])
-                maddpg.maddpg_agent[i].critic.load_state_dict(aux[i]['critic_params'])
-            elif DNN == 'MATD3_BC':
-                maddpg.matd3_bc_agent[i].actor.load_state_dict(aux[i]['actor_params'])
-                maddpg.matd3_bc_agent[i].critic.load_state_dict(aux[i]['critic_params'])
-            else:
-                break
+        # aux = torch.load(trained_checkpoint)
+        # for i in range(num_agents):  
+        #     if DNN == 'MADDPG':
+        #         maddpg.maddpg_agent[i].actor.load_state_dict(aux[i]['actor_params'])
+        #         maddpg.maddpg_agent[i].critic.load_state_dict(aux[i]['critic_params'])
+        #     elif DNN == 'MATD3_BC':
+        #         maddpg.matd3_bc_agent[i].actor.load_state_dict(aux[i]['actor_params'])
+        #         maddpg.matd3_bc_agent[i].critic.load_state_dict(aux[i]['critic_params'])
+        #     else:
+        #         break
     
     #Reset the environment
     all_obs = env.reset() 
@@ -135,7 +135,7 @@ def main():
                 aux = obs[n][m].reshape(1,obs_size)*0.
                 history[n][m] = np.concatenate((history[n][m],aux),axis=0)
     #Initialize action history buffer with 0.
-    history_a = np.zeros([parallel_envs,num_agents,HISTORY_LENGTH,2]) #the last entry is the number of actions, here is 2 (x,y)
+    history_a = np.zeros([parallel_envs,num_agents,HISTORY_LENGTH,1]) #the last entry is the number of actions, here is 2 (x,y)
     
     scores = 0                
     t = 0
@@ -157,7 +157,7 @@ def main():
     range_total = []
     episodes = 0
     episodes_total = []
-    while t<200:
+    while t<80:
         frames.append(env.render('rgb_array'))
         t +=1
         # select an action
@@ -168,7 +168,7 @@ def main():
         # actions = maddpg.act(transpose_to_tensor(history), noise=0.) 
         actions = maddpg.act(his,transpose_to_tensor(obs) , noise=0.) 
         
-        # print('actions=',actions)
+        print('actions=',actions)
          
         actions_array = torch.stack(actions).detach().numpy()
         actions_for_env = np.rollaxis(actions_array,1)
@@ -178,7 +178,7 @@ def main():
         # print('actions=',actions_for_env)
         
         
-        # actions_for_env = np.array([[[0.0,0.0]]])
+        actions_for_env = np.array([[[-1.]]])
         # if t  > 10:
         #     actions_for_env = np.array([[[0.,0.1]]])
         # if t  > 20:
@@ -189,7 +189,7 @@ def main():
         #     actions_for_env = np.array([[[1.,0.1]]])
         
         #see a random agent
-        # actions_for_env = np.array([[np.random.rand(2)*2-1]])
+        # actions_for_env = np.array([[np.random.rand(1)*2-1]])
         beta = 1.99 #must be between 1 and 2
         # actions_for_env = random_levy(beta)
         
@@ -204,7 +204,7 @@ def main():
                 history[n][m] = np.concatenate((history[n][m],aux),axis=0)
                 history[n][m] = np.delete(history[n][m],0,0)
         # Add actions to the history buffer
-        history_a = np.concatenate((history_a,actions_for_env.reshape(parallel_envs,num_agents,1,2)),axis=2)
+        history_a = np.concatenate((history_a,actions_for_env.reshape(parallel_envs,num_agents,1,1)),axis=2)
         history_a = np.delete(history_a,0,2)
                     
         # update the score (for each agent)
