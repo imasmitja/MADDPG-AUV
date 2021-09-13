@@ -205,9 +205,11 @@ class Scenario(BaseScenario):
                     # entity.action.u = np.array([0.05,0.0])
                     
                     #random movement
-                    entity.action.u = np.random.randn(2)/2.
-                    beta = 1.99 #must be between 1 and 2
+                    # entity.action.u = np.random.randn(2)/2.
+                    beta = 1. #must be between 1 and 2
                     entity.action.u = random_levy(beta)
+                    print('action.u levy     =', entity.action.u)
+                    print('entity.state.p_pos=', entity.state.p_pos)
                     if entity.state.p_pos[0] > 0.9:
                         entity.action.u[0] = -abs(entity.action.u[0])
                     if entity.state.p_pos[0] < -0.9:
@@ -216,6 +218,7 @@ class Scenario(BaseScenario):
                         entity.action.u[1] = -abs(entity.action.u[1])
                     if entity.state.p_pos[1] < -0.9:
                         entity.action.u[1] = abs(entity.action.u[1])
+                    print('action.u after levy=', entity.action.u)
                 
         # entity colors
         entity_color = []
