@@ -40,8 +40,8 @@ PROGRESS_BAR = True     #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
 # DEVICE = 'cpu'
 HISTORY_LENGTH = 5
-DNN = 'MADDPG'
-# DNN = 'MATD3_BC'
+# DNN = 'MADDPG'
+DNN = 'MATD3_BC'
 
 
 
@@ -252,7 +252,6 @@ def main():
                 his.append(torch.cat((transpose_to_tensor(history)[i],transpose_to_tensor(history_a)[i]), dim=2))
                       
             actions = maddpg.act(his,transpose_to_tensor(obs) , noise=noise) 
-        
             actions_array = torch.stack(actions).detach().numpy()
 
             # transpose the list of list
@@ -264,6 +263,7 @@ def main():
             # step forward one frame
             # next_obs, next_obs_full, rewards, dones, info = env.step(actions_for_env)
             next_obs, rewards, dones, info = env.step(actions_for_env)
+            
             # rewards_sum += np.mean(rewards)
             
             # collect experience

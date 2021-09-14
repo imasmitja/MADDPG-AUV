@@ -79,13 +79,16 @@ class Network(nn.Module):
             x = torch.cat((out,h00), dim=1)
             # Linear
             h1 = self.nonlin(self.fc1(x))
-            h2 = (self.fc2(h1))
-            # return h2
-            # h2 is a 2D vector (a force that is applied to the agent)
-            # we bound the norm of the vector to be between 0 and 10
-            norm = torch.norm(h2)
-            # return 10.0*(torch.tanh(norm))*h2/norm if norm > 0 else 10*h2
-            return 1.0*(torch.tanh(norm))*h2/norm if norm > 0 else 1*h2
+            # h2 = (self.fc2(h1))
+            
+            h2 = self.nonlin_tanh(self.fc2(h1))
+            return h2
+            
+            # # h2 is a 2D vector (a force that is applied to the agent)
+            # # we bound the norm of the vector to be between 0 and 10
+            # norm = torch.norm(h2)
+            # # return 10.0*(torch.tanh(norm))*h2/norm if norm > 0 else 10*h2
+            # return 1.0*(torch.tanh(norm))*h2/norm if norm > 0 else 1*h2
         
         else:
             # critic network simply outputs a number

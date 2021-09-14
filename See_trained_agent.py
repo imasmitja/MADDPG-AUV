@@ -32,7 +32,7 @@ LR_CRITIC   =   1e-3     # Learning rate of the critic
 WEIGHT_DECAY =  0 #1e-5     # L2 weight decay
 UPDATE_EVERY =  30       # How many steps to take before updating target networks
 UPDATE_TIMES =  20       # Number of times we update the networks
-SEED = 18119   #198                # Seed for random numbers
+SEED = 181299   #198                # Seed for random numbers
 BENCHMARK   =   True
 EXP_REP_BUF =   False     # Experienced replay buffer activation
 PRE_TRAINED =   True    # Use a previouse trained network as imput weights
@@ -43,8 +43,8 @@ RENDER = True #in BSC machines the render doesn't work
 PROGRESS_BAR = True #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
 HISTORY_LENGTH = 5
-DNN = 'MADDPG'
-# DNN = 'MA1TD3_BC'
+# DNN = 'MADDPG'
+DNN = 'MATD3_BC'
 
 def seeding(seed=1):
     np.random.seed(seed)
@@ -75,48 +75,22 @@ def main():
         agents_reward.append([])
     
     if PRE_TRAINED == True:
-        # trained_checkpoint = r'E:\Ivan\UPC\UDACITY\DRL_Nanodegree\Part4\MADDPG\032521_163018\model_dir\episode-59994.pt' #test1 2 agents
-        # trained_checkpoint = r'E:\Ivan\UPC\UDACITY\DRL_Nanodegree\Part4\MADDPG\032521_211315\model_dir\episode-59994.pt' #test1 2 agents
-        # trained_checkpoint = r'E:\Ivan\UPC\UDACITY\DRL_Nanodegree\Part4\MADDPG\032621_054252\model_dir\episode-36000.pt' #test1 2 agents
-        # trained_checkpoint = r'E:\Ivan\UPC\UDACITY\DRL_Nanodegree\Part4\MADDPG\032821_102717\model_dir\episode-99000.pt' #test1 6 agents
-        # trained_checkpoint = r'E:\Ivan\UPC\UDACITY\DRL_Nanodegree\Part4\MADDPG\032921_160324\model_dir\episode-99000.pt' #test2 6 agents pretrined
-        # trained_checkpoint = r'E:\Ivan\UPC\UDACITY\DRL_Nanodegree\Part4\MADDPG\033021_203450\model_dir\episode-73002.pt' #test2 6 agents pretrined
-        # trained_checkpoint = r'E:\Ivan\UPC\UDACITY\DRL_Nanodegree\Part4\MADDPG\033121_232315\model_dir\episode-265002.pt' #test2 6 agents 3 layers NN
-        # trained_checkpoint = r'E:\Ivan\UPC\UDACITY\DRL_Nanodegree\Part4\MADDPG\040521_000716\model_dir\episode-111000.pt' #test1 6 agents new reward function
-        # trained_checkpoint = r'E:\Ivan\UPC\UDACITY\DRL_Nanodegree\Part4\MADDPG\040621_143510\model_dir\episode-153000.pt' #test1 6 agents new new reward function
-        # trained_checkpoint = r'E:\Ivan\UPC\UDACITY\DRL_Nanodegree\Part4\MADDPG\040921_222255\model_dir\episode-299994.pt' #test1 6 agents new new reward function new positive reward
-        # trained_checkpoint = r'E:\Ivan\UPC\UDACITY\DRL_Nanodegree\Part4\MADDPG\041321_204450\model_dir\episode-196002.pt' #test1 6 agents new new reward function new positive reward and pretrined 
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\051021_140623\model_dir\episode-107000.pt' #first test with PF with one agent and one landmark
-        
-        #New tests with LS simple_track_ivan.py using the new network, which is simplified and parametres based on IEEEAccess paper as well as their rewards functions (more or less)
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090121_151545\model_dir\episode-350000.pt' #first test with LS with one agent and one landmark (episode_length=35) This works better, it has learned to stay close to the landmark and make small movements to maintain the error.
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090321_092533\model_dir\episode-799992.pt' #Test 40. first test with LS with one agent and one landmark (episode_length=35) This works better.
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090421_143431\model_dir\episode-700000.pt' #Test 44. 
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090521_093138\model_dir\episode-1200000.pt' #Test 47.
-        
-        # with TD3_BC architecture
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090421_203320\model_dir\episode-799992.pt' #Test 45.
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090521_222146\model_dir\episode-600000.pt' #Test 49.
-        
-
-        # New reward:
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090821_205550\model_dir\episode-1599992.pt' #Test 51. MATD3_BC
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090821_205550\model_dir\episode-850000.pt' #Test 51. MATD3_BC
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\090721_075950\model_dir\episode-50000.pt' #Test 52, MADDPG.
-        
+     
         # New corrected reward:
-        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091021_070417\model_dir\episode-1300000.pt' #Test 55, MADDPG.
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091321_192609\model_dir\episode-200000.pt' #Test 59, MADDPG
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091321_202342\model_dir\episode-50000.pt' #Test 59, TD3_BD.
+        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091421_070103\model_dir\episode-200000.pt' #Test 67, TD3_BD.
         
-        # aux = torch.load(trained_checkpoint)
-        # for i in range(num_agents):  
-        #     if DNN == 'MADDPG':
-        #         maddpg.maddpg_agent[i].actor.load_state_dict(aux[i]['actor_params'])
-        #         maddpg.maddpg_agent[i].critic.load_state_dict(aux[i]['critic_params'])
-        #     elif DNN == 'MATD3_BC':
-        #         maddpg.matd3_bc_agent[i].actor.load_state_dict(aux[i]['actor_params'])
-        #         maddpg.matd3_bc_agent[i].critic.load_state_dict(aux[i]['critic_params'])
-        #     else:
-        #         break
+        aux = torch.load(trained_checkpoint)
+        for i in range(num_agents):  
+            if DNN == 'MADDPG':
+                maddpg.maddpg_agent[i].actor.load_state_dict(aux[i]['actor_params'])
+                maddpg.maddpg_agent[i].critic.load_state_dict(aux[i]['critic_params'])
+            elif DNN == 'MATD3_BC':
+                maddpg.matd3_bc_agent[i].actor.load_state_dict(aux[i]['actor_params'])
+                maddpg.matd3_bc_agent[i].critic.load_state_dict(aux[i]['critic_params'])
+            else:
+                break
     
     #Reset the environment
     all_obs = env.reset() 
@@ -158,7 +132,7 @@ def main():
     range_total = []
     episodes = 0
     episodes_total = []
-    while t<80:
+    while t<200:
         frames.append(env.render('rgb_array'))
         t +=1
         # select an action
@@ -169,17 +143,17 @@ def main():
         # actions = maddpg.act(transpose_to_tensor(history), noise=0.) 
         actions = maddpg.act(his,transpose_to_tensor(obs) , noise=0.) 
         
-        print('actions=',actions)
+        # print('actions=',actions)
          
         actions_array = torch.stack(actions).detach().numpy()
         actions_for_env = np.rollaxis(actions_array,1)
         
         #cirlce path using my previous functions
-        # actions_for_env = circle_path(obs,65.) #if this value is bigger, the circle radius is smaller 60 => radi = 200m
-        # print('actions=',actions_for_env)
+        # actions_for_env = circle_path(obs,0.5) #if this value is bigger, the circle radius is smaller 60 => radi = 200m
+        print('actions=',actions_for_env)
         
         
-        actions_for_env = np.array([[[-1.]]])
+        # actions_for_env = np.array([[[-1.]]])
         # if t  > 10:
         #     actions_for_env = np.array([[[0.,0.1]]])
         # if t  > 20:
@@ -252,6 +226,7 @@ def main():
     plt.xlabel('X position')
     plt.ylabel('Y position')
     plt.title('Trained agent (RL)')
+    plt.axis('equal')
     # plt.title('Predefined cricumference')
     plt.legend()
     plt.show()

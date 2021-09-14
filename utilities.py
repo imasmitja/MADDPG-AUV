@@ -108,24 +108,43 @@ def circle_path(obs_all,radius):
     for obs_env in obs_all:
         for obs in obs_env:
             agent_pos = np.matrix([obs[2],obs[3]]).T #Agent position [x,y]
+            agent_ang = np.arctan2(obs.item(1),obs.item(0))
+            if agent_ang < 0.:
+                agent_ang += 2* np.pi
             landmark_pos = np.matrix([obs[4],obs[5]]).T #Predicted landmark position [x,y]
-            
             angle_agent_landmark = np.arctan2((landmark_pos).item(1),(landmark_pos).item(0)) #Angle between WG and Target
-        
-            #Agent goes with a parabolic trajectory and does circumferences around the landmark with a radius each step shorter
-            # radiu=0.005
-            # maxangle = 1.
-            radius_size = radius#55. #if this value is bigger, the circle radius is smaller 60 => radi = 200m
-            angle = angle_agent_landmark + np.pi/2.-radius_size*np.pi/180.
+            # if angle_agent_landmark < 0.:
+            #     angle_agent_landmark += 2* np.pi
             
-            #Code to standerize the angle
-            aux2=np.arctan2(np.sin(angle),np.cos(angle))
-            angle=aux2
-            try:
-                actions = np.concatenate((actions,np.array([[[np.cos(angle),np.sin(angle)]]])),axis=1)
-            except:
-                actions = np.array([[[np.cos(angle),np.sin(angle)]]])
-    return actions
+            
+            # angle = abs(agent_ang - angle_agent_landmark)/(np.pi*2)
+            
+            
+            if abs(agent_ang - angle_agent_landmark)  > np.pi/2.8:
+                angle = - radius + 0. 
+            # elif abs(agent_ang - angle_agent_landmark) < np.pi/2 and abs(agent_ang - angle_agent_landmark) > np.pi/4:
+            #     angle = -0.1
+            else:
+                angle = 0.
+                # angle = (agent_ang - angle_agent_landmark)/(np.pi*2)
+            # angle = - abs(agent_ang - angle_agent_landmark) -np.pi/4.
+        
+            # #Agent goes with a parabolic trajectory and does circumferences around the landmark with a radius each step shorter
+            # # radiu=0.005
+            # # maxangle = 1.
+            # radius_size = radius#55. #if this value is bigger, the circle radius is smaller 60 => radi = 200m
+            # angle = angle_agent_landmark + np.pi/2.-radius_size*np.pi/180.
+            
+            # #Code to standerize the angle
+            # aux2=np.arctan2(np.sin(angle),np.cos(angle))
+            # angle=aux2
+            # try:
+            #     actions = np.concatenate((actions,np.array([[[np.cos(angle),np.sin(angle)]]])),axis=1)
+            # except:
+            #     actions = np.array([[[np.cos(angle),np.sin(angle)]]])
+                
+                
+    return np.array([[[angle]]])
 
 
 def random_levy(beta):

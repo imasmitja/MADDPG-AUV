@@ -491,7 +491,7 @@ class Target(object):
     ####             Least Squares Algorithm  (LS)                                             ##         
     #############################################################################################
     def updateLS(self,dt,new_range,z,myobserver):
-        num_ls_points_used = 30
+        num_ls_points_used = 10
         #Propagate current target state estimate
         if new_range == True:
             self.allz.append(z)
