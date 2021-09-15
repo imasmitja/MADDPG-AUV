@@ -32,13 +32,13 @@ LR_CRITIC   =   1e-3     # Learning rate of the critic
 WEIGHT_DECAY =  0 #1e-5     # L2 weight decay
 UPDATE_EVERY =  30       # How many steps to take before updating target networks
 UPDATE_TIMES =  20       # Number of times we update the networks
-SEED = 181299   #198                # Seed for random numbers
+SEED = 876345   #198                # Seed for random numbers
 BENCHMARK   =   True
 EXP_REP_BUF =   False     # Experienced replay buffer activation
 PRE_TRAINED =   True    # Use a previouse trained network as imput weights
 #Scenario used to train the networks
-# SCENARIO    =   "simple_track_ivan" 
-SCENARIO    =   "dynamic_track_ivan" 
+SCENARIO    =   "simple_track_ivan" 
+# SCENARIO    =   "dynamic_track_ivan" 
 RENDER = True #in BSC machines the render doesn't work
 PROGRESS_BAR = True #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
@@ -79,7 +79,8 @@ def main():
         # New corrected reward:
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091321_192609\model_dir\episode-200000.pt' #Test 59, MADDPG
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091321_202342\model_dir\episode-50000.pt' #Test 59, TD3_BD.
-        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091421_070103\model_dir\episode-200000.pt' #Test 67, TD3_BD.
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091421_070103\model_dir\episode-200000.pt' #Test 68, TD3_BD.
+        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091421_185237\model_dir\episode-100000.pt' #Test 69, TD3_BD.
         
         aux = torch.load(trained_checkpoint)
         for i in range(num_agents):  
@@ -149,11 +150,11 @@ def main():
         actions_for_env = np.rollaxis(actions_array,1)
         
         #cirlce path using my previous functions
-        # actions_for_env = circle_path(obs,0.5) #if this value is bigger, the circle radius is smaller 60 => radi = 200m
+        # actions_for_env = circle_path(obs,1.,t) #if this value is bigger, the circle radius is smaller 60 => radi = 200m
         print('actions=',actions_for_env)
         
         
-        # actions_for_env = np.array([[[-1.]]])
+        # actions_for_env = np.array([[[np.pi*2./10./0.3]]])
         # if t  > 10:
         #     actions_for_env = np.array([[[0.,0.1]]])
         # if t  > 20:

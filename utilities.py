@@ -101,7 +101,11 @@ def gumbel_softmax(logits, temperature=0.5, hard=False):
     return y
 
 # modified by Ivan, to see an agent doing circles around the predicted landmark position. To compere with a MADDPG trained agent.
-def circle_path(obs_all,radius):
+tracked = False
+direction = -1.
+def circle_path(obs_all,radius,k):
+    global tracked
+    global direction
     # Set the movement of the mywg
     # Get parameters
     actions = np.array([[[]]])
@@ -113,19 +117,63 @@ def circle_path(obs_all,radius):
                 agent_ang += 2* np.pi
             landmark_pos = np.matrix([obs[4],obs[5]]).T #Predicted landmark position [x,y]
             angle_agent_landmark = np.arctan2((landmark_pos).item(1),(landmark_pos).item(0)) #Angle between WG and Target
-            # if angle_agent_landmark < 0.:
-            #     angle_agent_landmark += 2* np.pi
+            if angle_agent_landmark < 0.:
+                angle_agent_landmark += 2* np.pi
+            distance = np.sqrt((agent_pos.item(0)-landmark_pos.item(0))**2+(agent_pos.item(1)-landmark_pos.item(1))**2)
+
             
             
-            # angle = abs(agent_ang - angle_agent_landmark)/(np.pi*2)
+                
+            print('direction=',direction)
+            if distance > radius and tracked == False:
+                # if agent_ang < angle_agent_landmark:
+                #     angle = direction*radius + 0.
+                # elif agent_ang > angle_agent_landmark:
+                #     angle = -direction*radius + 0.
+                # elif agent_ang == angle_agent_landmark:
+                #     angle = 0.
+                
+                if agent_ang - angle_agent_landmark > np.pi and agent_ang > angle_agent_landmark:
+                    direction = 1.
+                    angle = direction*radius
+                elif agent_ang - angle_agent_landmark < np.pi and agent_ang > angle_agent_landmark:
+                    direction = -1. 
+                    if agent_ang - angle_agent_landmark < np.pi/2./2.:
+                            angle = 0.
+                    else:
+                        angle = direction*radius
+                elif angle_agent_landmark - agent_ang > np.pi and agent_ang < angle_agent_landmark:
+                    direction = -1.
+                    angle = direction*radius
+                elif angle_agent_landmark - agent_ang < np.pi and agent_ang < angle_agent_landmark:
+                    direction = 1.
+                    if angle_agent_landmark - agent_ang < np.pi/2./2.:
+                            angle = 0.
+                    else:
+                        angle = direction*radius
+                else:
+                    angle = 0.
+                
+            else:
+                tracked = True
+                if abs(agent_ang - angle_agent_landmark)  > np.pi/2.8:
+                    angle = direction*radius + 0. 
+                else:
+                    angle = 0.
             
+            print('distance     =',distance)
+            print('angle agent  =',agent_ang)
+            print('angle landm  =',angle_agent_landmark)
+            print('inc angle    =',angle)
             
-            if abs(agent_ang - angle_agent_landmark)  > np.pi/2.8:
-                angle = - radius + 0. 
+            # elif (agent_ang - angle_agent_landmark)  < -np.pi/2.8:
+            #     angle = + radius + 0. 
             # elif abs(agent_ang - angle_agent_landmark) < np.pi/2 and abs(agent_ang - angle_agent_landmark) > np.pi/4:
             #     angle = -0.1
-            else:
-                angle = 0.
+            # else:
+            #     angle = 0.
+                
+                
                 # angle = (agent_ang - angle_agent_landmark)/(np.pi*2)
             # angle = - abs(agent_ang - angle_agent_landmark) -np.pi/4.
         
