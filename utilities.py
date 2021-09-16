@@ -160,7 +160,11 @@ def circle_path(obs_all,radius,k):
                     angle = direction*radius + 0. 
                 else:
                     angle = 0.
-            
+            if k < 3:
+                angle = -radius
+            if angle == 0.:
+                angle = 0.1*direction
+            # angle += np.random.randn(1).item(0)/100
             print('distance     =',distance)
             print('angle agent  =',agent_ang)
             print('angle landm  =',angle_agent_landmark)

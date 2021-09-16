@@ -32,7 +32,7 @@ LR_CRITIC   =   1e-3     # Learning rate of the critic
 WEIGHT_DECAY =  0 #1e-5     # L2 weight decay
 UPDATE_EVERY =  30       # How many steps to take before updating target networks
 UPDATE_TIMES =  20       # Number of times we update the networks
-SEED = 876345   #198                # Seed for random numbers
+SEED = 45456   #198                # Seed for random numbers
 BENCHMARK   =   True
 EXP_REP_BUF =   False     # Experienced replay buffer activation
 PRE_TRAINED =   True    # Use a previouse trained network as imput weights
@@ -79,8 +79,12 @@ def main():
         # New corrected reward:
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091321_192609\model_dir\episode-200000.pt' #Test 59, MADDPG
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091321_202342\model_dir\episode-50000.pt' #Test 59, TD3_BD.
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091421_070103\model_dir\episode-200000.pt' #Test 68, TD3_BD.
-        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091421_185237\model_dir\episode-100000.pt' #Test 69, TD3_BD.
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091421_070103\model_dir\episode-200000.pt' #Test 68, TD3_BD. From my pc test
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091521_081505\model_dir\episode-1599992.pt' #Test 68, TD3_BD. From BSC test
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091521_081505\model_dir\episode-900000.pt' #Test 68, TD3_BD. From BSC test
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091421_185237\model_dir\episode-100000.pt' #Test 69, TD3_BD. From my pc test
+        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091621_092922\model_dir\episode-1599992.pt' #Test 69, TD3_BD. From BSC test
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091621_092922\model_dir\episode-1500000.pt' #Test 69, TD3_BD. From BSC test
         
         aux = torch.load(trained_checkpoint)
         for i in range(num_agents):  
