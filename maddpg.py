@@ -199,7 +199,7 @@ class MADDPG:
         # q_input2 = torch.cat((obs_full.to(self.device), q_input), dim=1)
         obs_q_full = torch.cat((obs_full.to(self.device),q_input), dim=1)
         actor_loss = -agent.critic(his_full.to(self.device),obs_q_full).mean() # get the policy gradient
-        actor_loss += (curr_q_input).mean()*1e-3 #modification from https://github.com/shariqiqbal2810/maddpg-pytorch/blob/master/algorithms/maddpg.py
+        actor_loss += (curr_q_input**2).mean()*1e-3 #modification from https://github.com/shariqiqbal2810/maddpg-pytorch/blob/master/algorithms/maddpg.py
         
         # Minimize the loss
         actor_loss.backward()
