@@ -229,4 +229,6 @@ class Scenario(BaseScenario):
         # if min(dists) > 1.5 or min(dists) < 0.1:
         if done_state:
             done = True
+        else:
+            done = False
         return done
