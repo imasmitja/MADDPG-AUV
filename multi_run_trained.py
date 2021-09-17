@@ -33,7 +33,7 @@ LR_CRITIC   =   1e-3     # Learning rate of the critic
 WEIGHT_DECAY =  0 #1e-5     # L2 weight decay
 UPDATE_EVERY =  30       # How many steps to take before updating target networks
 UPDATE_TIMES =  20       # Number of times we update the networks
-SEED = 4545672   #198                # Seed for random numbers
+SEED = 3   #198                # Seed for random numbers
 BENCHMARK   =   True
 EXP_REP_BUF =   False     # Experienced replay buffer activation
 PRE_TRAINED =   True    # Use a previouse trained network as imput weights
@@ -48,7 +48,7 @@ HISTORY_LENGTH = 5
 # DNN = 'MADDPG'
 # DNN = 'MATD3_BC'
 DNNS = ['MATD3_BC_T68','MATD3_BC_T69','circumference']
-NUM_RUNS_MEAN = 10
+NUM_RUNS_MEAN = 10000
 
 def seeding(seed=1):
     np.random.seed(seed)
@@ -239,18 +239,18 @@ def main():
 def plot_test(steps,agent_x,agent_y,landmark_x,landmark_y,landmark_p_x,landmark_p_y,range_total,total_rewards):  
     color = colors(len(steps[0]))
     for i, SCENARIO in enumerate(SCENARIOS):        
-        plt.figure(figsize=(5,5))
-        for n, dnn in enumerate(DNNS):
-            step_mean = np.mean(np.array(steps[i][n]),axis=0)
-            reward_mean = np.mean(np.array(total_rewards[i][n]),axis=0)
-            reward_std = np.std(np.array(total_rewards[i][n]),axis=0)
-            plt.plot(step_mean,reward_mean,'bo-', c=color[n] ,label=dnn)
-            plt.fill_between(step_mean, reward_mean+reward_std, reward_mean-reward_std, facecolor=color[n], alpha=0.5)
-        plt.legend()
-        plt.ylabel('Rewards')
-        plt.xlabel('Steps')
-        plt.title(SCENARIO)
-        plt.show()
+        # plt.figure(figsize=(5,5))
+        # for n, dnn in enumerate(DNNS):
+        #     step_mean = np.mean(np.array(steps[i][n]),axis=0)
+        #     reward_mean = np.mean(np.array(total_rewards[i][n]),axis=0)
+        #     reward_std = np.std(np.array(total_rewards[i][n]),axis=0)
+        #     plt.plot(step_mean,reward_mean,'bo-', c=color[n] ,label=dnn)
+        #     plt.fill_between(step_mean, reward_mean+reward_std, reward_mean-reward_std, facecolor=color[n], alpha=0.5)
+        # plt.legend()
+        # plt.ylabel('Rewards')
+        # plt.xlabel('Steps')
+        # plt.title(SCENARIO)
+        # plt.show()
         
         for n, dnn in enumerate(DNNS):
             plt.figure(figsize=(5,5))
@@ -274,14 +274,14 @@ def plot_test(steps,agent_x,agent_y,landmark_x,landmark_y,landmark_p_x,landmark_
             error_mean = np.mean(np.array(target_error[i][n]),axis=0)
             error_std = np.std(np.array(target_error[i][n]),axis=0)
             # import pdb; pdb.set_trace()
-            plt.plot(step_mean,error_mean,'bo-', c=color[n] ,label=dnn)
+            plt.plot(step_mean,error_mean,'b-', lw=2, c=color[n] ,label=dnn)
             plt.fill_between(step_mean, error_mean+error_std, error_mean-error_std, facecolor=color[n], alpha=0.5)
         plt.legend()
         plt.ylabel('Target prediction error (RMSE)')
         plt.xlabel('Steps')
         plt.title(SCENARIO)
         plt.ylim(0,0.3)
-        plt.xlim(0,len(steps[i][n]))
+        plt.xlim(0,len(steps[i][n][0]))
         # plt.title('Predefined cricumference')
         plt.show()
         
