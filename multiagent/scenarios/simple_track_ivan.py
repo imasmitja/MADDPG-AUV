@@ -101,8 +101,11 @@ class Scenario(BaseScenario):
         dist = np.sqrt(np.sum(np.square(delta_pos)))
         dist_min = agent1.size + agent2.size
         return True if dist < dist_min else False
-
+    
+    done_state = False
     def reward(self, agent, world):
+        global done_state
+        done_state = False
         # Agents are rewarded based on landmarks_estimated covariance_vals, penalized for collisions
         rew = 0.
         
@@ -116,6 +119,9 @@ class Scenario(BaseScenario):
             else:
                 world.error[i] = np.sqrt((l.lsxs[-1][0]-world.landmarks[i].state.p_pos[0])**2+(l.lsxs[-1][2]-world.landmarks[i].state.p_pos[1])**2) #Error from LS
             rew += 1.*(0.01-world.error[i])
+            if world.error[i]<0.003:
+                rew += 100.
+                done_state = True
         
         dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks[:-world.num_landmarks]]
         
@@ -125,8 +131,10 @@ class Scenario(BaseScenario):
             rew += 1.*(0.5-dist)
         if min(dists) > 1.5: #agent outside the world
             rew -= 100
-        if min(dists) < 0.1: #is collision
-            rew += 100
+            done_state = True
+        if min(dists) < 0.05: #is collision
+            rew -= 100
+            done_state = True
         #reward based on increment of action (from paper ieeeAccess) done in test 25      
         
         #compute the angle between the old direction and the new direction 
@@ -216,8 +224,9 @@ class Scenario(BaseScenario):
     
     def done(self, agent, world):
         # episodes are done based on the agents minimum distance from a landmark.
-        done = False
-        dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks[:-world.num_landmarks]]
-        if min(dists) > 1.5 or min(dists) < 0.1:
+        global done_state
+        # dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks[:-world.num_landmarks]]
+        # if min(dists) > 1.5 or min(dists) < 0.1:
+        if done_state:
             done = True
         return done
