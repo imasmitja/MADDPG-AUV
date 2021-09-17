@@ -19,6 +19,7 @@ from utilities import transpose_list, transpose_to_tensor, circle_path, random_l
 import time
 import copy
 import matplotlib.pyplot as plt
+import random
 
 # for saving gif
 import imageio
@@ -47,6 +48,7 @@ HISTORY_LENGTH = 5
 # DNN = 'MADDPG'
 # DNN = 'MATD3_BC'
 DNNS = ['MATD3_BC_T68','MATD3_BC_T69','circumference']
+NUM_RUNS_MEAN = 10
 
 def seeding(seed=1):
     np.random.seed(seed)
@@ -62,197 +64,256 @@ def main():
     landmark_p_x = []
     landmark_p_y = []
     range_total = []
-    results_dict = dict{}
-    for SCENARIO in SCENARIOS:
-        for DNN in DNNS:
+    total_rewards = []
+    for scenario_num, SCENARIO in enumerate(SCENARIOS):
+        print('scenario number: %d, name: %s'%(scenario_num,SCENARIO))
+        steps.append([])
+        agent_x.append([])
+        agent_y.append([])
+        landmark_x.append([])
+        landmark_y.append([])
+        landmark_p_x.append([])
+        landmark_p_y.append([])
+        range_total.append([])
+        total_rewards.append([])
+        for dnn_num, DNN in enumerate(DNNS):
+            steps[scenario_num].append([])
+            agent_x[scenario_num].append([])
+            agent_y[scenario_num].append([])
+            landmark_x[scenario_num].append([])
+            landmark_y[scenario_num].append([])
+            landmark_p_x[scenario_num].append([])
+            landmark_p_y[scenario_num].append([])
+            range_total[scenario_num].append([])
+            total_rewards[scenario_num].append([])
+            
+            #Initialize seed
             seeding(seed = SEED)
-            # number of parallel agents
-            parallel_envs = 1
-            # number of agents per environment
-            num_agents = 1
-            # number of landmarks (or targets) per environment
-            num_landmarks = 1
-            
-            # initialize environment
-            torch.set_num_threads(parallel_envs)
-            env = envs.make_parallel_env(parallel_envs, SCENARIO, seed = SEED, num_agents=num_agents, num_landmarks=num_landmarks, benchmark = BENCHMARK)
-            
-            # agents_reward = []
-            # for n in range(num_agents):
-            #     agents_reward.append([])
                 
-            # initialize policy and critic
-            if DNN == 'MADDPG':
-                    maddpg = MADDPG(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE)
-            elif DNN == 'MATD3_BC_T68':
-                    maddpg = MATD3_BC(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE)
-                    trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091521_081505\model_dir\episode-900000.pt' #Test 68, TD3_BD. From BSC test
-            elif DNN == 'MATD3_BC_T69' or 'circumference':
-                    maddpg = MATD3_BC(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE)
-                    trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091621_092922\model_dir\episode-1500000.pt' #Test 69, TD3_BD. From BSC test
-            else:
-                print('ERROR UNKNOWN DNN ARCHITECTURE')
-
-            aux = torch.load(trained_checkpoint)
-            for i in range(num_agents):  
+            for num_run in range(NUM_RUNS_MEAN):
+                steps[scenario_num][dnn_num].append([])
+                agent_x[scenario_num][dnn_num].append([])
+                agent_y[scenario_num][dnn_num].append([])
+                landmark_x[scenario_num][dnn_num].append([])
+                landmark_y[scenario_num][dnn_num].append([])
+                landmark_p_x[scenario_num][dnn_num].append([])
+                landmark_p_y[scenario_num][dnn_num].append([])
+                range_total[scenario_num][dnn_num].append([])
+                total_rewards[scenario_num][dnn_num].append([])
+                
+                # number of parallel agents
+                parallel_envs = 1
+                # number of agents per environment
+                num_agents = 1
+                # number of landmarks (or targets) per environment
+                num_landmarks = 1
+                
+                # initialize environment
+                torch.set_num_threads(parallel_envs)
+                env = envs.make_parallel_env(parallel_envs, SCENARIO, seed = SEED*num_run, num_agents=num_agents, num_landmarks=num_landmarks, benchmark = BENCHMARK)
+                
+                # agents_reward = []
+                # for n in range(num_agents):
+                #     agents_reward.append([])
+                    
+                # initialize policy and critic
                 if DNN == 'MADDPG':
-                    maddpg.maddpg_agent[i].actor.load_state_dict(aux[i]['actor_params'])
-                    maddpg.maddpg_agent[i].critic.load_state_dict(aux[i]['critic_params'])
-                elif DNN == 'MATD3_BC' or 'circumference':
-                    maddpg.matd3_bc_agent[i].actor.load_state_dict(aux[i]['actor_params'])
-                    maddpg.matd3_bc_agent[i].critic.load_state_dict(aux[i]['critic_params'])
+                        maddpg = MADDPG(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE)
+                elif DNN == 'MATD3_BC_T68':
+                        maddpg = MATD3_BC(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE)
+                        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091521_081505\model_dir\episode-900000.pt' #Test 68, TD3_BD. From BSC test
+                elif DNN == 'MATD3_BC_T69' or 'circumference':
+                        maddpg = MATD3_BC(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE)
+                        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091621_092922\model_dir\episode-1500000.pt' #Test 69, TD3_BD. From BSC test
                 else:
-                    break
-            
-            #Reset the environment
-            all_obs = env.reset() 
-            # flip the first two indices
-            obs_roll = np.rollaxis(all_obs,1)
-            obs = transpose_list(obs_roll)
-            
-            #Initialize history buffer with 0.
-            obs_size = obs[0][0].size
-            history = copy.deepcopy(obs)
-            for n in range(parallel_envs):
-                for m in range(num_agents):
-                    for i in range(HISTORY_LENGTH-1):
-                        if i == 0:
-                            history[n][m] = history[n][m].reshape(1,obs_size)*0.
-                        aux = obs[n][m].reshape(1,obs_size)*0.
-                        history[n][m] = np.concatenate((history[n][m],aux),axis=0)
-            #Initialize action history buffer with 0.
-            history_a = np.zeros([parallel_envs,num_agents,HISTORY_LENGTH,1]) #the last entry is the number of actions, here is 2 (x,y)
-            
-            scores = 0                
-            t = 0
-            
-            #save gif
-            frames = []
-            gif_folder = ''
-            main_folder = trained_checkpoint.split('\\')
-            for i in range(len(main_folder)-2):
-                gif_folder += main_folder[i]
-                gif_folder += '\\'
-            total_rewards = []
-            episodes = 0
-            episodes_total = []
-            while t<200:
-                frames.append(env.render('rgb_array'))
-                t +=1
-                # select an action
-                his = []
-                for i in range(num_agents):
-                    his.append(torch.cat((transpose_to_tensor(history)[i],transpose_to_tensor(history_a)[i]), dim=2))
-                # actions = maddpg.act(transpose_to_tensor(obs), noise=0.)       
-                # actions = maddpg.act(transpose_to_tensor(history), noise=0.) 
-                actions = maddpg.act(his,transpose_to_tensor(obs) , noise=0.) 
-                                 
-                actions_array = torch.stack(actions).detach().numpy()
-                actions_for_env = np.rollaxis(actions_array,1)
+                    print('ERROR UNKNOWN DNN ARCHITECTURE')
+    
+                aux = torch.load(trained_checkpoint)
+                for i in range(num_agents):  
+                    if DNN == 'MADDPG':
+                        maddpg.maddpg_agent[i].actor.load_state_dict(aux[i]['actor_params'])
+                        maddpg.maddpg_agent[i].critic.load_state_dict(aux[i]['critic_params'])
+                    elif DNN == 'MATD3_BC' or 'circumference':
+                        maddpg.matd3_bc_agent[i].actor.load_state_dict(aux[i]['actor_params'])
+                        maddpg.matd3_bc_agent[i].critic.load_state_dict(aux[i]['critic_params'])
+                    else:
+                        break
                 
-                #cirlce path using my previous functions
-                if DNN == 'circumference':
-                    actions_for_env = circle_path(obs,1.,t) #if this value is bigger, the circle radius is smaller 60 => radi = 200m
+                #Reset the environment
+                all_obs = env.reset() 
+                # flip the first two indices
+                obs_roll = np.rollaxis(all_obs,1)
+                obs = transpose_list(obs_roll)
                 
-                print('actions=',actions_for_env)
-                
-                # send all actions to the environment
-                next_obs, rewards, dones, info = env.step(actions_for_env)
-                
-                # Update history buffers
-                # Add obs to the history buffer
+                #Initialize history buffer with 0.
+                obs_size = obs[0][0].size
+                history = copy.deepcopy(obs)
                 for n in range(parallel_envs):
                     for m in range(num_agents):
-                        aux = obs[n][m].reshape(1,obs_size)
-                        history[n][m] = np.concatenate((history[n][m],aux),axis=0)
-                        history[n][m] = np.delete(history[n][m],0,0)
-                # Add actions to the history buffer
-                history_a = np.concatenate((history_a,actions_for_env.reshape(parallel_envs,num_agents,1,1)),axis=2)
-                history_a = np.delete(history_a,0,2)
+                        for i in range(HISTORY_LENGTH-1):
+                            if i == 0:
+                                history[n][m] = history[n][m].reshape(1,obs_size)*0.
+                            aux = obs[n][m].reshape(1,obs_size)*0.
+                            history[n][m] = np.concatenate((history[n][m],aux),axis=0)
+                #Initialize action history buffer with 0.
+                history_a = np.zeros([parallel_envs,num_agents,HISTORY_LENGTH,1]) #the last entry is the number of actions, here is 2 (x,y)
+                
+                scores = 0                
+                t = 0
+                
+                #save gif
+                frames = []
+                gif_folder = ''
+                main_folder = trained_checkpoint.split('\\')
+                for i in range(len(main_folder)-2):
+                    gif_folder += main_folder[i]
+                    gif_folder += '\\'
+                episodes = 0
+                episodes_total = []
+                while t<200:
+                    # frames.append(env.render('rgb_array'))
+                    t +=1
+                    # select an action
+                    his = []
+                    for i in range(num_agents):
+                        his.append(torch.cat((transpose_to_tensor(history)[i],transpose_to_tensor(history_a)[i]), dim=2))
+                    # actions = maddpg.act(transpose_to_tensor(obs), noise=0.)       
+                    # actions = maddpg.act(transpose_to_tensor(history), noise=0.) 
+                    actions = maddpg.act(his,transpose_to_tensor(obs) , noise=0.) 
+                                     
+                    actions_array = torch.stack(actions).detach().numpy()
+                    actions_for_env = np.rollaxis(actions_array,1)
+                    
+                    #cirlce path using my previous functions
+                    if DNN == 'circumference':
+                        actions_for_env = circle_path(obs,1.,t) #if this value is bigger, the circle radius is smaller 60 => radi = 200m
+                    
+                    # print('actions=',actions_for_env)
+                    
+                    # send all actions to the environment
+                    next_obs, rewards, dones, info = env.step(actions_for_env)
+                    
+                    # Update history buffers
+                    # Add obs to the history buffer
+                    for n in range(parallel_envs):
+                        for m in range(num_agents):
+                            aux = obs[n][m].reshape(1,obs_size)
+                            history[n][m] = np.concatenate((history[n][m],aux),axis=0)
+                            history[n][m] = np.delete(history[n][m],0,0)
+                    # Add actions to the history buffer
+                    history_a = np.concatenate((history_a,actions_for_env.reshape(parallel_envs,num_agents,1,1)),axis=2)
+                    history_a = np.delete(history_a,0,2)
+                                
+                    # update the score (for each agent)
+                    scores += np.sum(rewards)  
+                    # Save values to plot later on
+                    # import pdb; pdb.set_trace()
+                    total_rewards[scenario_num][dnn_num][num_run].append(np.sum(rewards))
+                    steps[scenario_num][dnn_num][num_run].append(t)          
+                    for n in range(parallel_envs):
+                        for m in range(num_agents):
+                            agent_x[scenario_num][dnn_num][num_run].append(obs[n][m][2])
+                            agent_y[scenario_num][dnn_num][num_run].append(obs[n][m][3])
+                            range_total[scenario_num][dnn_num][num_run].append(obs[n][m][6])
+                        for mm in range(num_landmarks):
+                            landmark_x[scenario_num][dnn_num][num_run].append(info[0]['n'][0][4][0][0])
+                            landmark_y[scenario_num][dnn_num][num_run].append(info[0]['n'][0][4][0][1])
+                            landmark_p_x[scenario_num][dnn_num][num_run].append(obs[n][m][4]+obs[n][m][2])
+                            landmark_p_y[scenario_num][dnn_num][num_run].append(obs[n][m][5]+obs[n][m][3])
                             
-                # update the score (for each agent)
-                scores += np.sum(rewards)  
-                # Save values to plot later on
-                total_rewards.append(np.sum(rewards))
-                steps.append(t)          
-                for n in range(parallel_envs):
-                    for m in range(num_agents):
-                        agent_x.append(obs[n][m][2])
-                        agent_y.append(obs[n][m][3])
-                        range_total.append(obs[n][m][6])
-                    for mm in range(num_landmarks):
-                        landmark_x.append(info[0]['n'][0][4][0][0])
-                        landmark_y.append(info[0]['n'][0][4][0][1])
-                        landmark_p_x.append(obs[n][m][4]+obs[n][m][2])
-                        landmark_p_y.append(obs[n][m][5]+obs[n][m][3])
-                        
-                # print ('\r\n Rewards at step %i = %.3f'%(t,scores))
-                # roll over states to next time step  
-                obs = next_obs     
-        
-                # print("Score: {}".format(scores))
-                episodes += 1
-                episodes_total.append(episodes)
-                if np.any(dones):
-                    print('done')
-                    print('Next:')
-                    episodes = 0
-    
+                    # print ('\r\n Rewards at step %i = %.3f'%(t,scores))
+                    # roll over states to next time step  
+                    obs = next_obs     
             
-    plt.figure(figsize=(5,5))
-    plt.plot(steps,total_rewards,'bo-')
-    plt.ylabel('Rewards')
-    plt.xlabel('Steps')
-    plt.title('Trained agent (RL)')
-    # plt.title('Predefined cricumference')
-    plt.show()
+                    # print("Score: {}".format(scores))
+                    episodes += 1
+                    episodes_total.append(episodes)
+                    if np.any(dones):
+                        print('done')
+                        print('Next:')
+                        episodes = 0
+                env.close()
+    return steps,agent_x,agent_y,landmark_x,landmark_y,landmark_p_x,landmark_p_y,range_total,total_rewards
+
+#%%  
+def plot_test(steps,agent_x,agent_y,landmark_x,landmark_y,landmark_p_x,landmark_p_y,range_total,total_rewards):  
+    color = colors(len(steps[0]))
+    for i, SCENARIO in enumerate(SCENARIOS):        
+        plt.figure(figsize=(5,5))
+        for n, dnn in enumerate(DNNS):
+            step_mean = np.mean(np.array(steps[i][n]),axis=0)
+            reward_mean = np.mean(np.array(total_rewards[i][n]),axis=0)
+            reward_std = np.std(np.array(total_rewards[i][n]),axis=0)
+            plt.plot(step_mean,reward_mean,'bo-', c=color[n] ,label=dnn)
+            plt.fill_between(step_mean, reward_mean+reward_std, reward_mean-reward_std, facecolor=color[n], alpha=0.5)
+        plt.legend()
+        plt.ylabel('Rewards')
+        plt.xlabel('Steps')
+        plt.title(SCENARIO)
+        plt.show()
+        
+        for n, dnn in enumerate(DNNS):
+            plt.figure(figsize=(5,5))
+            plt.plot(agent_x[i][n][0],agent_y[i][n][0],'bo--',alpha=0.5,label='Agent')
+            plt.plot(landmark_p_x[i][n][0],landmark_p_y[i][n][0],'rs--',alpha=0.5,label='Landmark Predicted')
+            plt.plot(landmark_x[i][n][0],landmark_y[i][n][0],'k^--',alpha=0.5,label='Landmark Real')
+            plt.xlabel('X position')
+            plt.ylabel('Y position')
+            plt.title(SCENARIO+'-('+dnn+')')
+            plt.axis('equal')
+            plt.grid()
+            plt.xlim(-1,1)
+            plt.ylim(-1,1)
+            plt.legend()
+            plt.show()
+        
+        target_error = np.sqrt((np.array(landmark_p_x)-np.array(landmark_x))**2+(np.array(landmark_p_y)-np.array(landmark_y))**2)
+        plt.figure(figsize=(5,5))
+        for n, dnn in enumerate(DNNS):
+            step_mean = np.mean(np.array(steps[i][n]),axis=0)
+            error_mean = np.mean(np.array(target_error[i][n]),axis=0)
+            error_std = np.std(np.array(target_error[i][n]),axis=0)
+            # import pdb; pdb.set_trace()
+            plt.plot(step_mean,error_mean,'bo-', c=color[n] ,label=dnn)
+            plt.fill_between(step_mean, error_mean+error_std, error_mean-error_std, facecolor=color[n], alpha=0.5)
+        plt.legend()
+        plt.ylabel('Target prediction error (RMSE)')
+        plt.xlabel('Steps')
+        plt.title(SCENARIO)
+        plt.ylim(0,0.3)
+        plt.xlim(0,len(steps[i][n]))
+        # plt.title('Predefined cricumference')
+        plt.show()
+        
     
-    plt.figure(figsize=(5,5))
-    plt.plot(agent_x,agent_y,'bo--',alpha=0.5,label='Agent')
-    plt.plot(landmark_p_x,landmark_p_y,'rs--',alpha=0.5,label='Landmark Predicted')
-    plt.plot(landmark_x,landmark_y,'k^--',alpha=0.5,label='Landmark Real')
-    plt.xlabel('X position')
-    plt.ylabel('Y position')
-    plt.title('Trained agent (RL)')
-    plt.axis('equal')
-    # plt.title('Predefined cricumference')
-    plt.legend()
-    plt.show()
     
-    target_error = np.sqrt((np.array(landmark_p_x)-np.array(landmark_x))**2+(np.array(landmark_p_y)-np.array(landmark_y))**2)
-    plt.figure(figsize=(5,5))
-    plt.plot(steps,target_error,'bo-')
-    plt.ylabel('Target prediction error (RMSE)')
-    plt.xlabel('Steps')
-    plt.title('Trained agent (RL)')
-    # plt.title('Predefined cricumference')
-    plt.show()
+    # print('MEAN SCORE = ',scores)
+    # print('TOTAL LAST SCORE = ',np.mean(total_rewards[::-1][:10]))
     
-    plt.figure(figsize=(5,5))
-    plt.plot(steps,range_total,'bo-')
-    plt.ylabel('Range')
-    plt.xlabel('Steps')
-    plt.title('Trained agent (RL)')
-    # plt.title('Predefined cricumference')
-    plt.show()
+    # while True:
+    #     a = 0
+    # imageio.mimsave(os.path.join(gif_folder, 'seed-{}.gif'.format(SEED)), 
+    #                             frames, duration=.04)
     
-    plt.figure(figsize=(5,5))
-    plt.plot(steps,episodes_total,'bo-')
-    plt.ylabel('Number of episodes')
-    plt.xlabel('Steps')
-    plt.title('Trained agent (RL)')
-    # plt.title('Predefined cricumference')
-    plt.show()
-    
-    print('MEAN SCORE = ',scores)
-    print('TOTAL LAST SCORE = ',np.mean(total_rewards[::-1][:10]))
-    
-    while True:
-        a = 0
-    imageio.mimsave(os.path.join(gif_folder, 'seed-{}.gif'.format(SEED)), 
-                                frames, duration=.04)
-    env.close()
-    
+#%%
+ 
+def colors(n): 
+  ret = [] 
+  r = int(random.random() * 256) 
+  g = int(random.random() * 256) 
+  b = int(random.random() * 256) 
+  step = 256 / n 
+  for i in range(n): 
+    r += step 
+    g += step 
+    b += step 
+    r = int(r) % 256 
+    g = int(g) % 256 
+    b = int(b) % 256 
+    ret.append((r/256,g/256,b/256))  
+  return ret    
+
 if __name__=='__main__':
-    main()
+    steps,agent_x,agent_y,landmark_x,landmark_y,landmark_p_x,landmark_p_y,range_total,total_rewards = main()
+    plot_test(steps,agent_x,agent_y,landmark_x,landmark_y,landmark_p_x,landmark_p_y,range_total,total_rewards)
     

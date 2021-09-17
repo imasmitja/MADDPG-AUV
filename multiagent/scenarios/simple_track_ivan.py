@@ -119,9 +119,9 @@ class Scenario(BaseScenario):
             else:
                 world.error[i] = np.sqrt((l.lsxs[-1][0]-world.landmarks[i].state.p_pos[0])**2+(l.lsxs[-1][2]-world.landmarks[i].state.p_pos[1])**2) #Error from LS
             rew += 1.*(0.01-world.error[i])
-            if world.error[i]<0.003:
-                rew += 100.
-                done_state = True
+            # if world.error[i]<0.003:
+            #     rew += 100.
+            #     done_state = True
         
         dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks[:-world.num_landmarks]]
         
@@ -132,8 +132,8 @@ class Scenario(BaseScenario):
         if min(dists) > 1.5: #agent outside the world
             rew -= 100
             done_state = True
-        if min(dists) < 0.05: #is collision
-            rew -= 100
+        if min(dists) < 0.1: #is collision
+            rew += 100
             done_state = True
         #reward based on increment of action (from paper ieeeAccess) done in test 25      
         
