@@ -39,6 +39,7 @@ RENDER = False          #in BSC machines the render doesn't work
 PROGRESS_BAR = True     #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
 # DEVICE = 'cpu'
+RNN = False
 HISTORY_LENGTH = 5
 DNN = 'MADDPG'
 # DNN = 'MATD3_BC'
@@ -143,9 +144,9 @@ def main():
     # initialize policy and critic
     print('Initialize the Actor-Critic networks')
     if DNN == 'MADDPG':
-            maddpg = MADDPG(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE)
+            maddpg = MADDPG(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE, rnn = RNN)
     elif DNN == 'MATD3_BC':
-            maddpg = MATD3_BC(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE)
+            maddpg = MATD3_BC(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE, rnn = RNN)
     else:
         print('ERROR UNKNOWN DNN ARCHITECTURE')
     logger = SummaryWriter(log_dir=log_path)
@@ -233,7 +234,6 @@ def main():
         #Initialize action history buffer with 0.
         history_a = np.zeros([parallel_envs,num_agents,HISTORY_LENGTH,1]) #the last entry is the number of actions, here is 2 (x,y)
         
-        print('history=',history)
         # save info or not
         save_info = ((episode) % save_interval < parallel_envs or episode==number_of_episodes-parallel_envs)
         frames = []
@@ -252,7 +252,6 @@ def main():
             for i in range(num_agents):
                 his.append(torch.cat((transpose_to_tensor(history)[i],transpose_to_tensor(history_a)[i]), dim=2))
                       
-            print('his=',his)
             actions = maddpg.act(his,transpose_to_tensor(obs) , noise=noise) 
             actions_array = torch.stack(actions).detach().numpy()
 

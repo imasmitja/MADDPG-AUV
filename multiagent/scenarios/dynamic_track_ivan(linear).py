@@ -4,7 +4,7 @@ from multiagent.scenario import BaseScenario
 from target_pf import Target
 from utilities import random_levy
 
-PF_METHOD = False
+PF_METHOD = True
 
 
 class Scenario(BaseScenario):
@@ -119,7 +119,7 @@ class Scenario(BaseScenario):
                 world.error[i] = np.sqrt((l.pfxs[0]-world.landmarks[i].state.p_pos[0])**2+(l.pfxs[2]-world.landmarks[i].state.p_pos[1])**2) #Error from PF
             else:
                 world.error[i] = np.sqrt((l.lsxs[-1][0]-world.landmarks[i].state.p_pos[0])**2+(l.lsxs[-1][2]-world.landmarks[i].state.p_pos[1])**2) #Error from LS
-            rew += 10.*(0.01-world.error[i])
+            rew += 1.*(0.01-world.error[i])
         
         dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks[:-world.num_landmarks]]
         
@@ -130,11 +130,11 @@ class Scenario(BaseScenario):
         if min(dists) > 1.5: #agent outside the world
             rew -= 100
         if min(dists) < 0.1: #is collision
-            rew -= 10
+            rew += 100
         #reward based on increment of action (from paper ieeeAccess) done in test 25      
         
         #compute the angle between the old direction and the new direction  
-        rew -= 0.0001*abs(agent.state.p_vel.item(0))
+        # rew -= 0.0001*abs(agent.state.p_vel.item(0))
         
         #old methods
         # inc_action = agent.state.p_vel_old - agent.state.p_vel
@@ -239,6 +239,6 @@ class Scenario(BaseScenario):
         # episodes are done based on the agents minimum distance from a landmark.
         done = False
         dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks[:-world.num_landmarks]]
-        if min(dists) > 1.5:
+        if min(dists) > 1.5 or min(dists) < 0.1:
             done = True
         return done

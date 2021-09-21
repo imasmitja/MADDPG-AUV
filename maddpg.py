@@ -10,7 +10,7 @@ import numpy as np
 
 
 class MADDPG:
-    def __init__(self, num_agents = 3, num_landmarks = 1, discount_factor=0.95, tau=0.02, lr_actor=1.0e-2, lr_critic=1.0e-2, weight_decay=1.0e-5, device = 'cpu'):
+    def __init__(self, num_agents = 3, num_landmarks = 1, discount_factor=0.95, tau=0.02, lr_actor=1.0e-2, lr_critic=1.0e-2, weight_decay=1.0e-5, device = 'cpu', rnn = True):
         super(MADDPG, self).__init__()
 
         # critic input = obs_full + actions = 14+2+2+2=20
@@ -69,7 +69,7 @@ class MADDPG:
         # print('RNN hidden size critic:        ',rnn_hidden_size_critic)
         
         
-        self.maddpg_agent = [DDPGAgent(in_actor, hidden_in_actor, hidden_out_actor, out_actor, in_critic, hidden_in_critic, hidden_out_critic, rnn_num_layers, rnn_hidden_size_actor, rnn_hidden_size_critic, lr_actor=lr_actor, lr_critic=lr_critic, weight_decay=weight_decay, device=device) for _ in range(num_agents)]
+        self.maddpg_agent = [DDPGAgent(in_actor, hidden_in_actor, hidden_out_actor, out_actor, in_critic, hidden_in_critic, hidden_out_critic, rnn_num_layers, rnn_hidden_size_actor, rnn_hidden_size_critic, lr_actor=lr_actor, lr_critic=lr_critic, weight_decay=weight_decay, device=device, rnn=rnn) for _ in range(num_agents)]
         # self.maddpg_agent = [DDPGAgent(14, 128, 128, 2, 48, 128, 128, lr_actor=lr_actor, lr_critic=lr_critic, weight_decay=weight_decay, device=device) for _ in range(num_agents)]
         
         self.discount_factor = discount_factor

@@ -124,7 +124,7 @@ def circle_path(obs_all,radius,k):
             
             
                 
-            print('direction=',direction)
+            # print('direction=',direction)
             if distance > radius and tracked == False:
                 # if agent_ang < angle_agent_landmark:
                 #     angle = direction*radius + 0.

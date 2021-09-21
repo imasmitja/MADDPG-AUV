@@ -10,7 +10,7 @@ def hidden_init(layer):
     return (-lim, lim)
 
 class Network(nn.Module):
-    def __init__(self, input_size, hidden_in_dim, hidden_out_dim, output_dim, rnn_num_layers, rnn_hidden_size, device, actor=False):
+    def __init__(self, input_size, hidden_in_dim, hidden_out_dim, output_dim, rnn_num_layers, rnn_hidden_size, device, actor=False, rnn=True):
         super(Network, self).__init__()
 
         """self.input_norm = nn.BatchNorm1d(input_dim)
@@ -19,17 +19,21 @@ class Network(nn.Module):
         self.device = device
         self.rnn_num_layers = rnn_num_layers
         self.rnn_hidden_size = rnn_hidden_size
-        # Recurrent NN layers (LSTM)
-        # self.rnn = nn.RNN(input_size, rnn_hidden_size, rnn_num_layers, batch_first=True)
-        # self.rnn = nn.GRU(input_size, rnn_hidden_size, rnn_num_layers, batch_first=True)
-        self.rnn = nn.LSTM(input_size, rnn_hidden_size, rnn_num_layers, batch_first=True)
+        self.rnn = rnn
+        self.aux_mul = 1
+        if self.rnn:
+            # Recurrent NN layers (LSTM)
+            # self.rnn = nn.RNN(input_size, rnn_hidden_size, rnn_num_layers, batch_first=True)
+            # self.rnn = nn.GRU(input_size, rnn_hidden_size, rnn_num_layers, batch_first=True)
+            self.rnn = nn.LSTM(input_size, rnn_hidden_size, rnn_num_layers, batch_first=True)
+            self.aux_mul = 2
         
         # Linear NN layers
         if actor == True:
-            self.fc1 = nn.Linear(rnn_hidden_size*2,hidden_in_dim)
+            self.fc1 = nn.Linear(rnn_hidden_size*self.aux_mul,hidden_in_dim)
             self.fc0 = nn.Linear(input_size - 1 ,rnn_hidden_size)
         else:
-            self.fc1 = nn.Linear(rnn_hidden_size*2,hidden_in_dim)
+            self.fc1 = nn.Linear(rnn_hidden_size*self.aux_mul,hidden_in_dim)
             self.fc0 = nn.Linear(input_size,rnn_hidden_size)        
         self.fc2 = nn.Linear(hidden_in_dim,output_dim)
         
@@ -47,16 +51,19 @@ class Network(nn.Module):
     def forward(self, x1, x2):
         if self.actor:
             # return a vector of the force
-            # RNN
-            h0 = torch.zeros(self.rnn_num_layers, x1.size(0), self.rnn_hidden_size).to(self.device) #Initial values for RNN
-            c0 = torch.zeros(self.rnn_num_layers, x1.size(0), self.rnn_hidden_size).to(self.device) #Initial values for RNN
-            # out, _ = self.rnn(x1,h0)
-            out, _ = self.rnn(x1,(h0,c0))
-            # out: batch_size, seq_legnth, hidden_size
-            out = out[:,-1,:]
-            # out: batch_size, hidden_size
-            h00 = self.nonlin(self.fc0(x2))
-            x = torch.cat((out,h00), dim=1)
+            if self.rnn:
+                # RNN
+                h0 = torch.zeros(self.rnn_num_layers, x1.size(0), self.rnn_hidden_size).to(self.device) #Initial values for RNN
+                c0 = torch.zeros(self.rnn_num_layers, x1.size(0), self.rnn_hidden_size).to(self.device) #Initial values for RNN
+                # out, _ = self.rnn(x1,h0)
+                out, _ = self.rnn(x1,(h0,c0))
+                # out: batch_size, seq_legnth, hidden_size
+                out = out[:,-1,:]
+                # out: batch_size, hidden_size
+                h00 = self.nonlin(self.fc0(x2))
+                x = torch.cat((out,h00), dim=1)
+            else:
+                x = self.nonlin(self.fc0(x2))
             # Linear
             h1 = self.nonlin(self.fc1(x))
             # h2 = (self.fc2(h1))
@@ -71,16 +78,19 @@ class Network(nn.Module):
         
         else:
             # critic network simply outputs a number
-            # RNN
-            h0 = torch.zeros(self.rnn_num_layers, x1.size(0), self.rnn_hidden_size).to(self.device) #Initial values for RNN
-            c0 = torch.zeros(self.rnn_num_layers, x1.size(0), self.rnn_hidden_size).to(self.device) #Initial values for RNN
-            # out, _ = self.rnn(x1,h0)
-            out, _ = self.rnn(x1,(h0,c0))
-            # out: batch_size, seq_legnth, hidden_size
-            out = out[:,-1,:]
-            # out: batch_size, hidden_size
-            h00 = self.nonlin(self.fc0(x2))
-            x = torch.cat((out,h00), dim=1)
+            if self.rnn:
+                # RNN
+                h0 = torch.zeros(self.rnn_num_layers, x1.size(0), self.rnn_hidden_size).to(self.device) #Initial values for RNN
+                c0 = torch.zeros(self.rnn_num_layers, x1.size(0), self.rnn_hidden_size).to(self.device) #Initial values for RNN
+                # out, _ = self.rnn(x1,h0)
+                out, _ = self.rnn(x1,(h0,c0))
+                # out: batch_size, seq_legnth, hidden_size
+                out = out[:,-1,:]
+                # out: batch_size, hidden_size
+                h00 = self.nonlin(self.fc0(x2))
+                x = torch.cat((out,h00), dim=1)
+            else:
+                x = self.nonlin(self.fc0(x2))
             # Linear
             h1 = self.nonlin(self.fc1(x))       
             h2 = (self.fc2(h1))

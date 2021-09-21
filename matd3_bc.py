@@ -10,7 +10,7 @@ import numpy as np
 
 
 class MATD3_BC:
-    def __init__(self, num_agents = 3, num_landmarks = 1, discount_factor=0.95, tau=0.02, lr_actor=1.0e-2, lr_critic=1.0e-2, weight_decay=1.0e-5, device = 'cpu'):
+    def __init__(self, num_agents = 3, num_landmarks = 1, discount_factor=0.95, tau=0.02, lr_actor=1.0e-2, lr_critic=1.0e-2, weight_decay=1.0e-5, device = 'cpu', rnn = True):
         super(MATD3_BC, self).__init__()
 
         in_actor = num_agents*2*2 + num_landmarks*2 + (num_agents-1)*2 + num_agents + 1 #all previous tests
@@ -38,7 +38,7 @@ class MATD3_BC:
         # print('Output nodes number:           ',out_actor)
         # print('RNN hidden size critic:        ',rnn_hidden_size_critic)
         
-        self.matd3_bc_agent = [TD3_BCAgent(in_actor, hidden_in_actor, hidden_out_actor, out_actor, in_critic, hidden_in_critic, hidden_out_critic, rnn_num_layers, rnn_hidden_size_actor, rnn_hidden_size_critic, lr_actor=lr_actor, lr_critic=lr_critic, weight_decay=weight_decay, device=device) for _ in range(num_agents)]
+        self.matd3_bc_agent = [TD3_BCAgent(in_actor, hidden_in_actor, hidden_out_actor, out_actor, in_critic, hidden_in_critic, hidden_out_critic, rnn_num_layers, rnn_hidden_size_actor, rnn_hidden_size_critic, lr_actor=lr_actor, lr_critic=lr_critic, weight_decay=weight_decay, device=device, rnn = rnn) for _ in range(num_agents)]
         # self.matd3_bc_agent = [DDPGAgent(14, 128, 128, 2, 48, 128, 128, lr_actor=lr_actor, lr_critic=lr_critic, weight_decay=weight_decay, device=device) for _ in range(num_agents)]
         
         self.discount_factor = discount_factor

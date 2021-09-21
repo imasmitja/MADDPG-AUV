@@ -32,16 +32,19 @@ LR_CRITIC   =   1e-3     # Learning rate of the critic
 WEIGHT_DECAY =  0 #1e-5     # L2 weight decay
 UPDATE_EVERY =  30       # How many steps to take before updating target networks
 UPDATE_TIMES =  20       # Number of times we update the networks
-SEED = 4712912   #198                # Seed for random numbers
+SEED = 412   #198                # Seed for random numbers
 BENCHMARK   =   True
 EXP_REP_BUF =   False     # Experienced replay buffer activation
 PRE_TRAINED =   True    # Use a previouse trained network as imput weights
 #Scenario used to train the networks
-SCENARIO    =   "simple_track_ivan" 
-# SCENARIO    =   "dynamic_track_ivan" 
+# SCENARIO    =   "simple_track_ivan" 
+SCENARIO    =   "dynamic_track_ivan"
+# SCENARIO    =   "dynamic_track_ivan(linear)" 
+# SCENARIO    =   "dynamic_track_ivan(levy)"
 RENDER = True #in BSC machines the render doesn't work
 PROGRESS_BAR = True #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
+RNN = True
 HISTORY_LENGTH = 5
 DNN = 'MADDPG'
 # DNN = 'MATD3_BC'
@@ -65,9 +68,9 @@ def main():
        
     # initialize policy and critic
     if DNN == 'MADDPG':
-            maddpg = MADDPG(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE)
+            maddpg = MADDPG(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE, rnn=RNN)
     elif DNN == 'MATD3_BC':
-            maddpg = MATD3_BC(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE)
+            maddpg = MATD3_BC(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE, rnn=RNN)
     else:
         print('ERROR UNKNOWN DNN ARCHITECTURE')
     agents_reward = []
@@ -85,10 +88,10 @@ def main():
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091421_185237\model_dir\episode-100000.pt' #Test 69, TD3_BD. From my pc test
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091621_092922\model_dir\episode-1599992.pt' #Test 69, TD3_BD. From BSC test
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091621_092922\model_dir\episode-1500000.pt' #Test 69, TD3_BD. From BSC test
-        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091721_124134\model_dir\episode-1599992.pt' #Test 70, MADDPG. From BSC test
+        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091721_124134\model_dir\episode-1599992.pt' #Test 70, MADDPG. From BSC test
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091721_232551\model_dir\episode-1599992.pt' #Test 702, MADDPG. From BSC test
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091721_153510\model_dir\episode-1500000.pt' #Test 71, MADDPG. From BSC test history_length = 20
-        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091721_171920\model_dir\episode-1450000.pt' #Test 72, MADDPG. From BSC test different reward function
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091721_171920\model_dir\episode-1450000.pt' #Test 72, MADDPG. From BSC test different reward function
         
         aux = torch.load(trained_checkpoint)
         for i in range(num_agents):  
@@ -226,6 +229,22 @@ def main():
     plt.xlabel('Steps')
     plt.title('Trained agent (RL)')
     # plt.title('Predefined cricumference')
+    plt.show()
+    
+    agent_xv = np.array(agent_x)[:-1]-np.array(agent_x)[1:]
+    agent_yv = np.array(agent_y)[:-1]-np.array(agent_y)[1:]
+    agent_v = np.sqrt(agent_xv**2 + agent_yv**2)
+    landmark_xv = np.array(landmark_x)[:-1]-np.array(landmark_x)[1:]
+    landmark_yv = np.array(landmark_y)[:-1]-np.array(landmark_y)[1:]
+    landmark_v = np.sqrt(landmark_xv**2 + landmark_yv**2)
+    plt.figure(figsize=(5,5))
+    plt.plot(steps[1:],agent_v,'bo--',alpha=0.5,label='Agent')
+    plt.plot(steps[1:],landmark_v,'k^--',alpha=0.5,label='Landmark')
+    plt.ylabel('relative velocity')
+    plt.xlabel('Steps')
+    plt.title('Trained agent (RL)')
+    # plt.title('Predefined cricumference')
+    plt.legend()
     plt.show()
     
     plt.figure(figsize=(5,5))
