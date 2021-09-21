@@ -40,8 +40,8 @@ PROGRESS_BAR = True     #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
 # DEVICE = 'cpu'
 HISTORY_LENGTH = 5
-# DNN = 'MADDPG'
-DNN = 'MATD3_BC'
+DNN = 'MADDPG'
+# DNN = 'MATD3_BC'
 
 
 
@@ -71,7 +71,7 @@ def main():
     num_landmarks = 1
     # number of training episodes.
     # change this to higher number to experiment. say 30000.
-    number_of_episodes = 1600000
+    number_of_episodes = 2600000
     episode_length = 200
     # how many episodes to save policy and gif
     save_interval = 50000
@@ -233,6 +233,7 @@ def main():
         #Initialize action history buffer with 0.
         history_a = np.zeros([parallel_envs,num_agents,HISTORY_LENGTH,1]) #the last entry is the number of actions, here is 2 (x,y)
         
+        print('history=',history)
         # save info or not
         save_info = ((episode) % save_interval < parallel_envs or episode==number_of_episodes-parallel_envs)
         frames = []
@@ -251,6 +252,7 @@ def main():
             for i in range(num_agents):
                 his.append(torch.cat((transpose_to_tensor(history)[i],transpose_to_tensor(history_a)[i]), dim=2))
                       
+            print('his=',his)
             actions = maddpg.act(his,transpose_to_tensor(obs) , noise=noise) 
             actions_array = torch.stack(actions).detach().numpy()
 

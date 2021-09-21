@@ -32,7 +32,7 @@ LR_CRITIC   =   1e-3     # Learning rate of the critic
 WEIGHT_DECAY =  0 #1e-5     # L2 weight decay
 UPDATE_EVERY =  30       # How many steps to take before updating target networks
 UPDATE_TIMES =  20       # Number of times we update the networks
-SEED = 4545672   #198                # Seed for random numbers
+SEED = 4712912   #198                # Seed for random numbers
 BENCHMARK   =   True
 EXP_REP_BUF =   False     # Experienced replay buffer activation
 PRE_TRAINED =   True    # Use a previouse trained network as imput weights
@@ -43,8 +43,8 @@ RENDER = True #in BSC machines the render doesn't work
 PROGRESS_BAR = True #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
 HISTORY_LENGTH = 5
-# DNN = 'MADDPG'
-DNN = 'MATD3_BC'
+DNN = 'MADDPG'
+# DNN = 'MATD3_BC'
 
 def seeding(seed=1):
     np.random.seed(seed)
@@ -83,8 +83,12 @@ def main():
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091521_081505\model_dir\episode-1599992.pt' #Test 68, TD3_BD. From BSC test
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091521_081505\model_dir\episode-900000.pt' #Test 68, TD3_BD. From BSC test
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091421_185237\model_dir\episode-100000.pt' #Test 69, TD3_BD. From my pc test
-        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091621_092922\model_dir\episode-1599992.pt' #Test 69, TD3_BD. From BSC test
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091621_092922\model_dir\episode-1599992.pt' #Test 69, TD3_BD. From BSC test
         # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091621_092922\model_dir\episode-1500000.pt' #Test 69, TD3_BD. From BSC test
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091721_124134\model_dir\episode-1599992.pt' #Test 70, MADDPG. From BSC test
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091721_232551\model_dir\episode-1599992.pt' #Test 702, MADDPG. From BSC test
+        # trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091721_153510\model_dir\episode-1500000.pt' #Test 71, MADDPG. From BSC test history_length = 20
+        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091721_171920\model_dir\episode-1450000.pt' #Test 72, MADDPG. From BSC test different reward function
         
         aux = torch.load(trained_checkpoint)
         for i in range(num_agents):  

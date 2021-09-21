@@ -47,14 +47,19 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run th
 HISTORY_LENGTH = 5
 # DNN = 'MADDPG'
 # DNN = 'MATD3_BC'
-DNNS = ['MATD3_BC_T68','MATD3_BC_T69','circumference']
-NUM_RUNS_MEAN = 10000
+# DNNS = ['MATD3_BC_T68','MATD3_BC_T69','circumference']
+DNNS = ['MATD3_BC_T68','MATD3_BC_T69','circumference','MADDPG_T70','MADDPG_T702','MADDPG_T71','MADDPG_T72']
+NUM_RUNS_MEAN = 1000 #1000
+
+NAME_FOLDER = 'E:\\Ivan\\UPC\\GitHub\\plots'
+NAME_FILE = 'LSTM4T4'
 
 def seeding(seed=1):
     np.random.seed(seed)
     torch.manual_seed(seed)
 
 def main():
+    global HISTORY_LENGTH
     # Run a bunch of tests to compere the results
     steps = []
     agent_x = []
@@ -119,21 +124,43 @@ def main():
                 # initialize policy and critic
                 if DNN == 'MADDPG':
                         maddpg = MADDPG(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE)
+                        
                 elif DNN == 'MATD3_BC_T68':
                         maddpg = MATD3_BC(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE)
                         trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091521_081505\model_dir\episode-900000.pt' #Test 68, TD3_BD. From BSC test
-                elif DNN == 'MATD3_BC_T69' or 'circumference':
+                
+                elif DNN == 'MATD3_BC_T69' or DNN == 'circumference':
                         maddpg = MATD3_BC(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE)
                         trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091621_092922\model_dir\episode-1500000.pt' #Test 69, TD3_BD. From BSC test
+                
+                elif DNN == 'MADDPG_T70':
+                        maddpg = MADDPG(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE)
+                        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091721_124134\model_dir\episode-1599992.pt' #Test 70, MADDPG. From BSC test
+                        
+                elif DNN == 'MADDPG_T702':
+                        maddpg = MADDPG(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE)
+                        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091721_232551\model_dir\episode-1599992.pt' #Test 702, MADDPG. From BSC test
+                        
+                elif DNN == 'MADDPG_T71':
+                        HISTORY_LENGTH = 20
+                        maddpg = MADDPG(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE)
+                        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091721_153510\model_dir\episode-1500000.pt' #Test 71, MADDPG. From BSC test history_length = 20
+                        
+                elif DNN == 'MADDPG_T72':
+                        maddpg = MADDPG(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE)
+                        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091721_171920\model_dir\episode-1450000.pt' #Test 72, MADDPG. From BSC test different reward function
+                
                 else:
                     print('ERROR UNKNOWN DNN ARCHITECTURE')
     
-                aux = torch.load(trained_checkpoint)
+                
                 for i in range(num_agents):  
-                    if DNN == 'MADDPG':
+                    if DNN.find('MADDPG') == 0:
+                        aux = torch.load(trained_checkpoint)
                         maddpg.maddpg_agent[i].actor.load_state_dict(aux[i]['actor_params'])
                         maddpg.maddpg_agent[i].critic.load_state_dict(aux[i]['critic_params'])
-                    elif DNN == 'MATD3_BC' or 'circumference':
+                    elif DNN.find('MATD3') == 0 or DNN == 'circumference':
+                        aux = torch.load(trained_checkpoint)
                         maddpg.matd3_bc_agent[i].actor.load_state_dict(aux[i]['actor_params'])
                         maddpg.matd3_bc_agent[i].critic.load_state_dict(aux[i]['critic_params'])
                     else:
@@ -233,6 +260,7 @@ def main():
                         print('Next:')
                         episodes = 0
                 env.close()
+                # save_data(steps[scenario_num][dnn_num][num_run],agent_x[scenario_num][dnn_num][num_run],agent_y,landmark_x,landmark_y,landmark_p_x,landmark_p_y,range_total,total_rewards)
     return steps,agent_x,agent_y,landmark_x,landmark_y,landmark_p_x,landmark_p_y,range_total,total_rewards
 
 #%%  
@@ -295,6 +323,17 @@ def plot_test(steps,agent_x,agent_y,landmark_x,landmark_y,landmark_p_x,landmark_
     # imageio.mimsave(os.path.join(gif_folder, 'seed-{}.gif'.format(SEED)), 
     #                             frames, duration=.04)
     
+def save_data(steps,agent_x,agent_y,landmark_x,landmark_y,landmark_p_x,landmark_p_y,range_total,total_rewards):
+    np.save(NAME_FOLDER+'\\'+NAME_FILE+'_steps.npy', steps)
+    np.save(NAME_FOLDER+'\\'+NAME_FILE+'_agent_x.npy', agent_x)
+    np.save(NAME_FOLDER+'\\'+NAME_FILE+'_agent_y.npy', agent_y)
+    np.save(NAME_FOLDER+'\\'+NAME_FILE+'_landmark_x.npy', landmark_x)
+    np.save(NAME_FOLDER+'\\'+NAME_FILE+'_landmark_y.npy', landmark_y)
+    np.save(NAME_FOLDER+'\\'+NAME_FILE+'_landmark_p_x.npy', landmark_p_x)
+    np.save(NAME_FOLDER+'\\'+NAME_FILE+'_landmark_p_y.npy', landmark_p_y)
+    np.save(NAME_FOLDER+'\\'+NAME_FILE+'_range_total.npy', range_total)
+    np.save(NAME_FOLDER+'\\'+NAME_FILE+'_total_rewards.npy', total_rewards)
+    return
 #%%
  
 def colors(n): 
@@ -315,5 +354,6 @@ def colors(n):
 
 if __name__=='__main__':
     steps,agent_x,agent_y,landmark_x,landmark_y,landmark_p_x,landmark_p_y,range_total,total_rewards = main()
+    save_data(steps,agent_x,agent_y,landmark_x,landmark_y,landmark_p_x,landmark_p_y,range_total,total_rewards)
     plot_test(steps,agent_x,agent_y,landmark_x,landmark_y,landmark_p_x,landmark_p_y,range_total,total_rewards)
     

@@ -25,18 +25,18 @@ class MATD3_BC:
         rnn_hidden_size_actor = 64
         rnn_hidden_size_critic = 64
         
-        print('Actor NN configuration:')
-        print('Input nodes number:            ',in_actor)
-        print('Hidden 1st layer nodes number: ',hidden_in_actor)
-        print('Hidden 2nd layer nodes number: ',hidden_out_actor)
-        print('Output nodes number:           ',out_actor)
-        print('RNN hidden size actor :        ',rnn_hidden_size_actor)
-        print('Critic NN configuration:')
-        print('Input nodes number:            ',in_critic)
-        print('Hidden 1st layer nodes number: ',hidden_in_critic)
-        print('Hidden 2nd layer nodes number: ',hidden_out_critic)
-        print('Output nodes number:           ',out_actor)
-        print('RNN hidden size critic:        ',rnn_hidden_size_critic)
+        # print('Actor NN configuration:')
+        # print('Input nodes number:            ',in_actor)
+        # print('Hidden 1st layer nodes number: ',hidden_in_actor)
+        # print('Hidden 2nd layer nodes number: ',hidden_out_actor)
+        # print('Output nodes number:           ',out_actor)
+        # print('RNN hidden size actor :        ',rnn_hidden_size_actor)
+        # print('Critic NN configuration:')
+        # print('Input nodes number:            ',in_critic)
+        # print('Hidden 1st layer nodes number: ',hidden_in_critic)
+        # print('Hidden 2nd layer nodes number: ',hidden_out_critic)
+        # print('Output nodes number:           ',out_actor)
+        # print('RNN hidden size critic:        ',rnn_hidden_size_critic)
         
         self.matd3_bc_agent = [TD3_BCAgent(in_actor, hidden_in_actor, hidden_out_actor, out_actor, in_critic, hidden_in_critic, hidden_out_critic, rnn_num_layers, rnn_hidden_size_actor, rnn_hidden_size_critic, lr_actor=lr_actor, lr_critic=lr_critic, weight_decay=weight_decay, device=device) for _ in range(num_agents)]
         # self.matd3_bc_agent = [DDPGAgent(14, 128, 128, 2, 48, 128, 128, lr_actor=lr_actor, lr_critic=lr_critic, weight_decay=weight_decay, device=device) for _ in range(num_agents)]

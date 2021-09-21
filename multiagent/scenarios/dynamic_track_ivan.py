@@ -106,7 +106,10 @@ class Scenario(BaseScenario):
         dist_min = agent1.size + agent2.size
         return True if dist < dist_min else False
 
+    done_state = False
     def reward(self, agent, world):
+        global done_state
+        done_state = False
         # Agents are rewarded based on landmarks_estimated covariance_vals, penalized for collisions
         rew = 0.
         
@@ -119,22 +122,27 @@ class Scenario(BaseScenario):
                 world.error[i] = np.sqrt((l.pfxs[0]-world.landmarks[i].state.p_pos[0])**2+(l.pfxs[2]-world.landmarks[i].state.p_pos[1])**2) #Error from PF
             else:
                 world.error[i] = np.sqrt((l.lsxs[-1][0]-world.landmarks[i].state.p_pos[0])**2+(l.lsxs[-1][2]-world.landmarks[i].state.p_pos[1])**2) #Error from LS
-            rew += 10.*(0.01-world.error[i])
+            # rew += 1.*(0.01-world.error[i])
+            # if world.error[i]<0.003:
+            #     rew += 100.
+            #     done_state = True
         
         dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks[:-world.num_landmarks]]
         
         #For Test 11
         for dist in dists:
             # rew += 10*np.exp(-1/2*(dist-0.1)**2/0.1)-5
-            rew += 1*(0.5-dist)
+            rew += 1.*(0.5-dist)
         if min(dists) > 1.5: #agent outside the world
             rew -= 100
+            done_state = True
         if min(dists) < 0.1: #is collision
-            rew -= 10
+            rew += 100
+            done_state = True
         #reward based on increment of action (from paper ieeeAccess) done in test 25      
         
         #compute the angle between the old direction and the new direction  
-        rew -= 0.0001*abs(agent.state.p_vel.item(0))
+        # rew -= 0.0001*abs(agent.state.p_vel.item(0))
         
         #old methods
         # inc_action = agent.state.p_vel_old - agent.state.p_vel
@@ -143,7 +151,7 @@ class Scenario(BaseScenario):
         #     rew = 0.01
             
             
-        agent.state.p_vel_old = agent.state.p_vel + 0.
+        # agent.state.p_vel_old = agent.state.p_vel + 0.
         
             
         if agent.collide:
@@ -203,22 +211,22 @@ class Scenario(BaseScenario):
                 if entity.movable:
                     
                     #linear movement
-                    entity.action.u = np.array([0.05,0.0])
+                    # entity.action.u = np.array([0.05,0.0])
                     
                     # # random movement
                     # entity.action.u = np.random.randn(2)/2.
                     
-                    # #random walk Levy movement
-                    # beta = 1.9 #must be between 1 and 2
-                    # entity.action.u = random_levy(beta)
-                    # if entity.state.p_pos[0] > 0.8:
-                    #     entity.action.u[0] = -abs(entity.action.u[0])
-                    # if entity.state.p_pos[0] < -0.8:
-                    #     entity.action.u[0] = abs(entity.action.u[0])
-                    # if entity.state.p_pos[1] > 0.8:
-                    #     entity.action.u[1] = -abs(entity.action.u[1])
-                    # if entity.state.p_pos[1] < -0.8:
-                    #     entity.action.u[1] = abs(entity.action.u[1])
+                    #random walk Levy movement
+                    beta = 1.9 #must be between 1 and 2
+                    entity.action.u = random_levy(beta)
+                    if entity.state.p_pos[0] > 0.8:
+                        entity.action.u[0] = -abs(entity.action.u[0])
+                    if entity.state.p_pos[0] < -0.8:
+                        entity.action.u[0] = abs(entity.action.u[0])
+                    if entity.state.p_pos[1] > 0.8:
+                        entity.action.u[1] = -abs(entity.action.u[1])
+                    if entity.state.p_pos[1] < -0.8:
+                        entity.action.u[1] = abs(entity.action.u[1])
                 
         # entity colors
         entity_color = []
@@ -237,8 +245,11 @@ class Scenario(BaseScenario):
     
     def done(self, agent, world):
         # episodes are done based on the agents minimum distance from a landmark.
-        done = False
-        dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks[:-world.num_landmarks]]
-        if min(dists) > 1.5:
+        global done_state
+        # dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks[:-world.num_landmarks]]
+        # if min(dists) > 1.5 or min(dists) < 0.1:
+        if done_state:
             done = True
+        else:
+            done = False
         return done
