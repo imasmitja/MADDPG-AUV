@@ -38,12 +38,14 @@ class Network(nn.Module):
             #Q1
             if self.rnn:
                 self.rnn_q1 = nn.LSTM(input_size, rnn_hidden_size, rnn_num_layers, batch_first=True)
+                self.aux_mul = 2
             self.fc0_q1 = nn.Linear(input_size,rnn_hidden_size)
             self.fc1_q1 = nn.Linear(rnn_hidden_size*self.aux_mul,hidden_in_dim)
             self.fc2_q1 = nn.Linear(hidden_in_dim,output_dim)
             #Q2
             if self.rnn:
                 self.rnn_q2 = nn.LSTM(input_size, rnn_hidden_size, rnn_num_layers, batch_first=True)
+                self.aux_mul = 2
             self.fc0_q2 = nn.Linear(input_size,rnn_hidden_size)
             self.fc1_q2 = nn.Linear(rnn_hidden_size*self.aux_mul,hidden_in_dim)
             self.fc2_q2 = nn.Linear(hidden_in_dim,output_dim)     
