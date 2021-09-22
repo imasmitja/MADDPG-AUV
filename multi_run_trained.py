@@ -50,10 +50,10 @@ HISTORY_LENGTH = 5
 # DNN = 'MATD3_BC'
 # DNNS = ['MATD3_BC_T68','MATD3_BC_T69','circumference']
 DNNS = ['MATD3_BC_T68','MATD3_BC_T69','circumference','MADDPG_T70','MADDPG_T702','MADDPG_T71','MADDPG_T72']
-NUM_RUNS_MEAN = 2 #1000
+NUM_RUNS_MEAN = 50 #1000
 
 NAME_FOLDER = 'E:\\Ivan\\UPC\\GitHub\\plots'
-NAME_FILE = 'LSTM4T4_PF_'
+NAME_FILE = 'LSTM4T5'
 
 def seeding(seed=1):
     np.random.seed(seed)
