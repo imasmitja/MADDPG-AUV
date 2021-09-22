@@ -41,8 +41,8 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run th
 # DEVICE = 'cpu'
 RNN = True
 HISTORY_LENGTH = 5
-# DNN = 'MADDPG'
-DNN = 'MATD3_BC'
+DNN = 'MADDPG'
+# DNN = 'MATD3_BC'
 
 
 
@@ -144,7 +144,7 @@ def main():
     # initialize policy and critic
     print('Initialize the Actor-Critic networks')
     if DNN == 'MADDPG':
-            maddpg = MADDPG(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE, rnn = RNN)
+            maddpg =   MADDPG(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE, rnn = RNN)
     elif DNN == 'MATD3_BC':
             maddpg = MATD3_BC(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE, rnn = RNN)
     else:

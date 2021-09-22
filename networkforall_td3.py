@@ -18,12 +18,12 @@ class Network(nn.Module):
         self.device = device
         self.rnn_num_layers = rnn_num_layers
         self.rnn_hidden_size = rnn_hidden_size
-        self.rnn = rnn
+        self.rnn_active = rnn
         self.aux_mul = 1
         # Linear NN layers
         if actor == True:
             # Recurrent NN layers (LSTM)
-            if self.rnn:
+            if self.rnn_active:
                 # self.rnn = nn.RNN(input_size, rnn_hidden_size, rnn_num_layers, batch_first=True)
                 # self.rnn = nn.GRU(input_size, rnn_hidden_size, rnn_num_layers, batch_first=True)
                 self.rnn = nn.LSTM(input_size, rnn_hidden_size, rnn_num_layers, batch_first=True)
@@ -36,14 +36,14 @@ class Network(nn.Module):
             # self.rnn = nn.RNN(input_size, rnn_hidden_size, rnn_num_layers, batch_first=True)
             # self.rnn = nn.GRU(input_size, rnn_hidden_size, rnn_num_layers, batch_first=True)
             #Q1
-            if self.rnn:
+            if self.rnn_active:
                 self.rnn_q1 = nn.LSTM(input_size, rnn_hidden_size, rnn_num_layers, batch_first=True)
                 self.aux_mul = 2
             self.fc0_q1 = nn.Linear(input_size,rnn_hidden_size)
             self.fc1_q1 = nn.Linear(rnn_hidden_size*self.aux_mul,hidden_in_dim)
             self.fc2_q1 = nn.Linear(hidden_in_dim,output_dim)
             #Q2
-            if self.rnn:
+            if self.rnn_active:
                 self.rnn_q2 = nn.LSTM(input_size, rnn_hidden_size, rnn_num_layers, batch_first=True)
                 self.aux_mul = 2
             self.fc0_q2 = nn.Linear(input_size,rnn_hidden_size)
@@ -76,7 +76,7 @@ class Network(nn.Module):
         if self.actor:
             # return a vector of the force
             # RNN
-            if self.rnn:
+            if self.rnn_active:
                 h0 = torch.zeros(self.rnn_num_layers, x1.size(0), self.rnn_hidden_size).to(self.device) #Initial values for RNN
                 c0 = torch.zeros(self.rnn_num_layers, x1.size(0), self.rnn_hidden_size).to(self.device) #Initial values for RNN
                 # out, _ = self.rnn(x1,h0)
@@ -105,7 +105,7 @@ class Network(nn.Module):
             # critic network simply outputs a number
             
             #Q1
-            if self.rnn:
+            if self.rnn_active:
                 # RNN
                 h0_q1 = torch.zeros(self.rnn_num_layers, x1.size(0), self.rnn_hidden_size).to(self.device) #Initial values for RNN
                 c0_q1 = torch.zeros(self.rnn_num_layers, x1.size(0), self.rnn_hidden_size).to(self.device) #Initial values for RNN
@@ -123,7 +123,7 @@ class Network(nn.Module):
             h2_q1 = (self.fc2_q1(h1_q1))
             
             #Q2
-            if self.rnn:
+            if self.rnn_active:
                 # RNN
                 h0_q2 = torch.zeros(self.rnn_num_layers, x1.size(0), self.rnn_hidden_size).to(self.device) #Initial values for RNN
                 c0_q2 = torch.zeros(self.rnn_num_layers, x1.size(0), self.rnn_hidden_size).to(self.device) #Initial values for RNN
@@ -144,7 +144,7 @@ class Network(nn.Module):
         
     def Q1(self, x1, x2):
         #Q1
-        if self.rnn:
+        if self.rnn_active:
             # RNN
             h0_q1 = torch.zeros(self.rnn_num_layers, x1.size(0), self.rnn_hidden_size).to(self.device) #Initial values for RNN
             c0_q1 = torch.zeros(self.rnn_num_layers, x1.size(0), self.rnn_hidden_size).to(self.device) #Initial values for RNN

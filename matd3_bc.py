@@ -44,6 +44,7 @@ class MATD3_BC:
         self.discount_factor = discount_factor
         self.tau = tau
         self.iter = 0
+        self.iter_delay = 0
         
         self.policy_freq = 2
         self.num_agents = num_agents
@@ -149,7 +150,7 @@ class MATD3_BC:
         agent.critic_optimizer.step()
         
         # Delayed policy updates
-        if self.iter % self.policy_freq == 0:
+        if self.iter_delay % self.policy_freq == 0:
             # ---------------------------- update actor ---------------------------- #
             #update actor network using policy gradient
             # Compute actor loss
@@ -189,11 +190,11 @@ class MATD3_BC:
                                self.iter)
         
         if agent_number == self.num_agents:
-            self.iter += 1
+            self.iter_delay += 1
 
     def update_targets(self):
         """soft update targets"""
-        # self.iter += 1
+        self.iter += 1
         # ----------------------- update target networks ----------------------- #
         for td3_bc_agent in self.matd3_bc_agent:
             soft_update(td3_bc_agent.target_actor, td3_bc_agent.actor, self.tau)

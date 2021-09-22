@@ -19,9 +19,9 @@ class Network(nn.Module):
         self.device = device
         self.rnn_num_layers = rnn_num_layers
         self.rnn_hidden_size = rnn_hidden_size
-        self.rnn = rnn
+        self.rnn_active = rnn
         self.aux_mul = 1
-        if self.rnn:
+        if self.rnn_active:
             # Recurrent NN layers (LSTM)
             # self.rnn = nn.RNN(input_size, rnn_hidden_size, rnn_num_layers, batch_first=True)
             # self.rnn = nn.GRU(input_size, rnn_hidden_size, rnn_num_layers, batch_first=True)
@@ -51,7 +51,7 @@ class Network(nn.Module):
     def forward(self, x1, x2):
         if self.actor:
             # return a vector of the force
-            if self.rnn:
+            if self.rnn_active:
                 # RNN
                 h0 = torch.zeros(self.rnn_num_layers, x1.size(0), self.rnn_hidden_size).to(self.device) #Initial values for RNN
                 c0 = torch.zeros(self.rnn_num_layers, x1.size(0), self.rnn_hidden_size).to(self.device) #Initial values for RNN
@@ -78,7 +78,7 @@ class Network(nn.Module):
         
         else:
             # critic network simply outputs a number
-            if self.rnn:
+            if self.rnn_active:
                 # RNN
                 h0 = torch.zeros(self.rnn_num_layers, x1.size(0), self.rnn_hidden_size).to(self.device) #Initial values for RNN
                 c0 = torch.zeros(self.rnn_num_layers, x1.size(0), self.rnn_hidden_size).to(self.device) #Initial values for RNN
