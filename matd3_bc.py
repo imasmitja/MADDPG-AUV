@@ -190,12 +190,13 @@ class MATD3_BC:
                                self.iter)
         
         
-        if agent_number+1 == self.num_agents:
-            self.iter_delay += 1
+        # if agent_number+1 == self.num_agents:
+        #     self.iter_delay += 1
 
     def update_targets(self):
         """soft update targets"""
         self.iter += 1
+        self.iter_delay += 1
         # ----------------------- update target networks ----------------------- #
         for td3_bc_agent in self.matd3_bc_agent:
             soft_update(td3_bc_agent.target_actor, td3_bc_agent.actor, self.tau)
