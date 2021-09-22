@@ -189,7 +189,8 @@ class MATD3_BC:
                                 'actor_loss': al},
                                self.iter)
         
-        if agent_number == self.num_agents:
+        
+        if agent_number+1 == self.num_agents:
             self.iter_delay += 1
 
     def update_targets(self):
