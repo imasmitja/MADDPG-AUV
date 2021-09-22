@@ -125,14 +125,14 @@ def circle_path(obs_all,radius,k):
             
                 
             # print('direction=',direction)
-            if distance > radius and tracked == False:
+            if distance > radius/5. and tracked == False:
                 # if agent_ang < angle_agent_landmark:
                 #     angle = direction*radius + 0.
                 # elif agent_ang > angle_agent_landmark:
                 #     angle = -direction*radius + 0.
                 # elif agent_ang == angle_agent_landmark:
                 #     angle = 0.
-                
+                const = 0.5
                 if agent_ang - angle_agent_landmark > np.pi and agent_ang > angle_agent_landmark:
                     direction = 1.
                     angle = direction*radius
@@ -160,11 +160,12 @@ def circle_path(obs_all,radius,k):
                     angle = direction*radius + 0. 
                 else:
                     angle = 0.
-            if k < 3:
+            if k < 2:
                 angle = -radius
-            if angle == 0.:
-                angle = 0.1*direction
+            # if angle == 0.:
+            #     angle = 0.01*direction
             # angle += np.random.randn(1).item(0)/100
+            
             # print('distance     =',distance)
             # print('angle agent  =',agent_ang)
             # print('angle landm  =',angle_agent_landmark)

@@ -32,13 +32,13 @@ LR_CRITIC   =   1e-3     # Learning rate of the critic
 WEIGHT_DECAY =  0 #1e-5     # L2 weight decay
 UPDATE_EVERY =  30       # How many steps to take before updating target networks
 UPDATE_TIMES =  20       # Number of times we update the networks
-SEED = 412   #198                # Seed for random numbers
+SEED =  21 #60 #1345 #1111 #412   #198                # Seed for random numbers
 BENCHMARK   =   True
 EXP_REP_BUF =   False     # Experienced replay buffer activation
 PRE_TRAINED =   True    # Use a previouse trained network as imput weights
 #Scenario used to train the networks
-# SCENARIO    =   "simple_track_ivan" 
-SCENARIO    =   "dynamic_track_ivan"
+SCENARIO    =   "simple_track_ivan" 
+# SCENARIO    =   "dynamic_track_ivan"
 # SCENARIO    =   "dynamic_track_ivan(linear)" 
 # SCENARIO    =   "dynamic_track_ivan(levy)"
 RENDER = True #in BSC machines the render doesn't work
@@ -46,8 +46,8 @@ PROGRESS_BAR = True #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
 RNN = True
 HISTORY_LENGTH = 5
-DNN = 'MADDPG'
-# DNN = 'MATD3_BC'
+# DNN = 'MADDPG'
+DNN = 'MATD3_BC'
 
 def seeding(seed=1):
     np.random.seed(seed)
@@ -161,8 +161,8 @@ def main():
         actions_for_env = np.rollaxis(actions_array,1)
         
         #cirlce path using my previous functions
-        # actions_for_env = circle_path(obs,1.,t) #if this value is bigger, the circle radius is smaller 60 => radi = 200m
-        print('actions=',actions_for_env)
+        actions_for_env = circle_path(obs,1.,t) #if this value is bigger, the circle radius is smaller 60 => radi = 200m
+        # print('actions=',actions_for_env)
         
         
         # actions_for_env = np.array([[[np.pi*2./10./0.3]]])
