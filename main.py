@@ -41,8 +41,8 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run th
 # DEVICE = 'cpu'
 RNN = True
 HISTORY_LENGTH = 5
-DNN = 'MADDPG'
-# DNN = 'MATD3_BC'
+# DNN = 'MADDPG'
+DNN = 'MATD3_BC'
 
 
 
