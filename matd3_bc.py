@@ -46,9 +46,11 @@ class MATD3_BC:
         self.iter = 0
         
         self.policy_freq = 2
+        self.num_agents = num_agents
         
         #initial priority for the experienced replay buffer
         self.priority = 1.
+        
         
         #device 'cuda' or 'cpu'
         self.device = device
@@ -185,10 +187,13 @@ class MATD3_BC:
                                {'critic loss': cl,
                                 'actor_loss': al},
                                self.iter)
+        
+        if agent_number == self.num_agents:
+            self.iter += 1
 
     def update_targets(self):
         """soft update targets"""
-        self.iter += 1
+        # self.iter += 1
         # ----------------------- update target networks ----------------------- #
         for td3_bc_agent in self.matd3_bc_agent:
             soft_update(td3_bc_agent.target_actor, td3_bc_agent.actor, self.tau)
