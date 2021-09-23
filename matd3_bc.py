@@ -106,6 +106,17 @@ class MATD3_BC:
             his.append(torch.cat((his_obs[i],his_act[i]), dim=2))
         his_full = torch.cat(his,dim=2)
         
+        next_his = []
+        for i in range(len(his_obs)):
+            aux = torch.cat((his_obs[i],obs[i].reshape(his_obs[i].shape[0],1,his_obs[i].shape[2])),dim=1)
+            aux = np.delete(aux,0,1)
+            aux_a = torch.cat((his_act[i],action.reshape(his_act[i].shape[0],1,his_act[i].shape[2])),dim=1)
+            aux_a = np.delete(aux_a,0,1)
+            next_his.append(torch.cat((aux,aux_a), dim=2))
+        # if self.iter > 1:      
+        #     import pdb; pdb.set_trace()
+        # next_his.append(torch.cat((obs,action), dim=2))
+        
         agent = self.matd3_bc_agent[agent_number]
         agent.critic_optimizer.zero_grad()
 
@@ -113,7 +124,10 @@ class MATD3_BC:
         # Get predicted next-state actions and Q values from target models
         #critic loss = batch mean of (y- Q(s,a) from target network)^2
         #y = reward of this timestep + discount * Q(st+1,at+1) from target network
-        target_actions_next = self.target_act(his,next_obs) 
+        
+        # target_actions_next = self.target_act(his,next_obs) 
+        target_actions_next = self.target_act(next_his,next_obs) 
+        
         target_actions_next = torch.cat(target_actions_next, dim=1)
         # target_critic_input = torch.cat((next_obs_full.t(),target_actions_next), dim=1).to(self.device)
         # target_critic_input = torch.cat((next_obs_full,target_actions_next), dim=1).to(self.device)
