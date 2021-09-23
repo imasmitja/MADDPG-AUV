@@ -134,16 +134,14 @@ class MADDPG:
             his.append(torch.cat((his_obs[i],his_act[i]), dim=2))
         his_full = torch.cat(his,dim=2)
         
-        next_his = []
-        for i in range(len(his_obs)):
-            aux = torch.cat((his_obs[i],obs[i].reshape(his_obs[i].shape[0],1,his_obs[i].shape[2])),dim=1)
-            aux = np.delete(aux,0,1)
-            aux_a = torch.cat((his_act[i],action.reshape(his_act[i].shape[0],1,his_act[i].shape[2])),dim=1)
-            aux_a = np.delete(aux_a,0,1)
-            next_his.append(torch.cat((aux,aux_a), dim=2))
-        # if self.iter > 1:      
-        #     import pdb; pdb.set_trace()
-        # next_his.append(torch.cat((obs,action), dim=2))
+        # next_his = []
+        # for i in range(len(his_obs)):
+        #     aux = torch.cat((his_obs[i],obs[i].reshape(his_obs[i].shape[0],1,his_obs[i].shape[2])),dim=1)
+        #     aux = np.delete(aux,0,1)
+        #     aux_a = torch.cat((his_act[i],action.reshape(his_act[i].shape[0],1,his_act[i].shape[2])),dim=1)
+        #     aux_a = np.delete(aux_a,0,1)
+        #     next_his.append(torch.cat((aux,aux_a), dim=2))
+
         
         agent = self.maddpg_agent[agent_number]
         agent.critic_optimizer.zero_grad()

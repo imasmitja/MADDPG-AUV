@@ -106,6 +106,9 @@ direction = -1.
 def circle_path(obs_all,radius,k):
     global tracked
     global direction
+    if k == 1:
+        tracked = False
+        direction = -1
     # Set the movement of the mywg
     # Get parameters
     actions = np.array([[[]]])

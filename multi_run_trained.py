@@ -33,7 +33,7 @@ LR_CRITIC   =   1e-3     # Learning rate of the critic
 WEIGHT_DECAY =  0 #1e-5     # L2 weight decay
 UPDATE_EVERY =  30       # How many steps to take before updating target networks
 UPDATE_TIMES =  20       # Number of times we update the networks
-SEED = 3   #198                # Seed for random numbers
+SEED = 3 #3   #198                # Seed for random numbers
 BENCHMARK   =   True
 EXP_REP_BUF =   False     # Experienced replay buffer activation
 PRE_TRAINED =   True    # Use a previouse trained network as imput weights
@@ -41,6 +41,7 @@ PRE_TRAINED =   True    # Use a previouse trained network as imput weights
 # SCENARIO    =   "simple_track_ivan" 
 # SCENARIO    =   "dynamic_track_ivan" 
 SCENARIOS = ["simple_track_ivan" ,"dynamic_track_ivan(linear)","dynamic_track_ivan(random)" ,"dynamic_track_ivan(levy)"]
+# SCENARIOS = ["simple_track_ivan"]
 RENDER = True #in BSC machines the render doesn't work
 PROGRESS_BAR = True #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
@@ -54,7 +55,7 @@ DNNS = ['MATD3_BC_T68','MATD3_BC_T69','circumference','MADDPG_T70','MADDPG_T702'
 NUM_RUNS_MEAN = 100 #1000
 
 NAME_FOLDER = 'E:\\Ivan\\UPC\\GitHub\\plots'
-NAME_FILE = 'LSTM4T7'
+NAME_FILE = 'LSTM4T8'
 
 def seeding(seed=1):
     np.random.seed(seed)
@@ -117,7 +118,7 @@ def main():
                 
                 # initialize environment
                 torch.set_num_threads(parallel_envs)
-                env = envs.make_parallel_env(parallel_envs, SCENARIO, seed = SEED*num_run, num_agents=num_agents, num_landmarks=num_landmarks, benchmark = BENCHMARK)
+                env = envs.make_parallel_env(parallel_envs, SCENARIO, seed = SEED*(num_run), num_agents=num_agents, num_landmarks=num_landmarks, benchmark = BENCHMARK)
                 
                 # agents_reward = []
                 # for n in range(num_agents):

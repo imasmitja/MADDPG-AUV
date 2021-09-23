@@ -54,7 +54,7 @@ def seeding(seed=1):
     torch.manual_seed(seed)
 
 def main():
-    seeding(seed = SEED)
+    seeding(seed = 3)
     # number of parallel agents
     parallel_envs = 1
     # number of agents per environment
