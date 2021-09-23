@@ -132,6 +132,11 @@ class MADDPG:
         for i in range(len(his_obs)):
             his.append(torch.cat((his_obs[i],his_act[i]), dim=2))
         his_full = torch.cat(his,dim=2)
+        next_his = []
+        for i in range(len(his_obs)-1):
+            next_his.append(torch.cat((his_obs[i+1],his_act[i+1]), dim=2))
+        import pdb; pdb.set_trace()
+        next_his.append(torch.cat((obs,action), dim=2))
         
         agent = self.maddpg_agent[agent_number]
         agent.critic_optimizer.zero_grad()
@@ -140,7 +145,10 @@ class MADDPG:
         # Get predicted next-state actions and Q values from target models
         #critic loss = batch mean of (y- Q(s,a) from target network)^2
         #y = reward of this timestep + discount * Q(st+1,at+1) from target network
-        target_actions_next = self.target_act(his,next_obs) 
+        
+        # target_actions_next = self.target_act(his,next_obs) 
+        target_actions_next = self.target_act(next_his,next_obs) 
+        
         target_actions_next = torch.cat(target_actions_next, dim=1)
         # target_critic_input = torch.cat((next_obs_full.t(),target_actions_next), dim=1).to(self.device)
         # target_critic_input = torch.cat((next_obs_full,target_actions_next), dim=1).to(self.device)
