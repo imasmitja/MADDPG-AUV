@@ -40,8 +40,8 @@ RENDER = False          #in BSC machines the render doesn't work
 PROGRESS_BAR = True     #if we want to render the progress bar
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #To run the pytorch tensors on cuda GPU
 # DEVICE = 'cpu'
-RNN = False
-HISTORY_LENGTH = 5
+RNN = True
+HISTORY_LENGTH = 10
 DNN = 'MADDPG'
 # DNN = 'MATD3_BC'
 
