@@ -305,7 +305,7 @@ class ParticleFilter(object):
                 ratio = 120 #15 works ok; ratio=10 is ok for statik targets
             else:
                 ratio = 50 #50 works ok; ratio=10 is ok for statik targets
-            radii = 0.01 #50 works ok
+            radii = 0.2 #50 works ok
             #From: https://classroom.udacity.com/courses/ud810/lessons/3353208568/concepts/33538586070923
             p3 = np.zeros([self.particle_number,self.dimx])
             ci = np.zeros(self.particle_number)
@@ -460,7 +460,7 @@ class Target(object):
     ####            Particle Filter Algorithm  (PF)                                             ##         
     #############################################################################################                               
     def updatePF(self,dt,new_range,z,myobserver,update=True):
-        max_error = 1.
+        max_error = 0.5
         if update == True:
                   
             # Initialize the particles if needed

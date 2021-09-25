@@ -50,12 +50,13 @@ HISTORY_LENGTH = 5
 # DNN = 'MADDPG'
 # DNN = 'MATD3_BC'
 # DNNS = ['MATD3_BC_T68','MATD3_BC_T69','circumference']
-DNNS = ['MATD3_BC_T68','MATD3_BC_T69','circumference','MADDPG_T70','MADDPG_T702','MADDPG_T71','MADDPG_T72']
+# DNNS = ['MATD3_BC_T68','MATD3_BC_T69','circumference','MADDPG_T70','MADDPG_T702','MADDPG_T71','MADDPG_T72']
+DNNS = ['MADDPG_T75','MADDPG_LSTM_T77','circumference','MATD3_LSTM']
 # DNNS = ['circumference']
 NUM_RUNS_MEAN = 100 #1000
 
 NAME_FOLDER = 'E:\\Ivan\\UPC\\GitHub\\plots'
-NAME_FILE = 'LSTM4T8'
+NAME_FILE = 'LSTM4T9_PF'
 
 def seeding(seed=1):
     np.random.seed(seed)
@@ -63,6 +64,7 @@ def seeding(seed=1):
 
 def main():
     global HISTORY_LENGTH
+    global RNN 
     # Run a bunch of tests to compere the results
     steps = []
     agent_x = []
@@ -123,7 +125,6 @@ def main():
                 # agents_reward = []
                 # for n in range(num_agents):
                 #     agents_reward.append([])
-                    
                 # initialize policy and critic
                 if DNN == 'MADDPG':
                         maddpg = MADDPG(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE, rnn=RNN)
@@ -152,6 +153,20 @@ def main():
                 elif DNN == 'MADDPG_T72':
                         maddpg = MADDPG(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE, rnn=RNN)
                         trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\091721_171920\model_dir\episode-1450000.pt' #Test 72, MADDPG. From BSC test different reward function
+                
+                
+                elif DNN == 'MADDPG_T75':
+                        RNN = False
+                        maddpg = MADDPG(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE, rnn=RNN)
+                        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\092221_162809\model_dir\episode-3599992.pt' #Test 
+                elif DNN == 'MADDPG_LSTM_T77':
+                        RNN = True
+                        maddpg = MADDPG(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE, rnn=RNN)
+                        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\092221_155202\model_dir\episode-2800000.pt' #Test 
+                elif DNN == 'MATD3_LSTM' or DNN == 'circumference':
+                        RNN = True
+                        maddpg = MATD3_BC(num_agents = num_agents, num_landmarks = num_landmarks, discount_factor=GAMMA, tau=TAU, lr_actor=LR_ACTOR, lr_critic=LR_CRITIC, weight_decay=WEIGHT_DECAY, device = DEVICE, rnn=RNN)
+                        trained_checkpoint = r'E:\Ivan\UPC\GitHub\logs\092321_065219\model_dir\episode-3599992.pt' #Test 
                 
                 else:
                     print('ERROR UNKNOWN DNN ARCHITECTURE')

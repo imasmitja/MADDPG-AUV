@@ -4,7 +4,7 @@ from multiagent.scenario import BaseScenario
 from target_pf import Target
 from utilities import random_levy
 
-PF_METHOD = False
+PF_METHOD = True
 
 
 class Scenario(BaseScenario):

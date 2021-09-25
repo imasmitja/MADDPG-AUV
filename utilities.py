@@ -209,7 +209,7 @@ def random_levy(beta):
     sigma = ((math.gamma(1+beta)*np.sin(np.pi*beta/2))/(math.gamma((1+beta)/2)*beta*2**((beta-1)/2)))**(1/beta)
     u = np.random.normal(0.,sigma)
     v = np.random.normal(0.,1.)
-    step_length = u / abs(v)**(1/beta)
+    step_length = np.clip(u / abs(v)**(1/beta),-5,5)
     return np.array([np.cos(direction)*step_length, np.sin(direction)*step_length])
     
     
